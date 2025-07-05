@@ -21,6 +21,7 @@ import asyncio
 import threading
 import logging
 import queue
+import traceback
 from datetime import datetime
 from typing import Optional, Dict, Any, List, Callable
 from pathlib import Path
@@ -38,7 +39,7 @@ from PIL import Image, ImageTk
 
 # Backend imports
 from .config import Config, config
-from .logger import setup_logger, get_performance_logger
+from .logger import setup_logger, get_performance_logger, get_debug_logger
 from .orchestrator import ModelOrchestrator, QueryContext, ModelChoice, QueryComplexity
 from .hardware import hardware_detector
 
@@ -63,6 +64,7 @@ class SovereignGUI:
         """Initialize the GUI application"""
         self.config = config
         self.logger = logging.getLogger("sovereign.gui")
+        self.debug_logger = get_debug_logger()
         
         # Core components
         self.orchestrator: Optional[ModelOrchestrator] = None
@@ -152,7 +154,8 @@ class SovereignGUI:
     def process_request_thread(self, prompt: str):
         """Worker function to process AI requests in a separate thread"""
         try:
-            self.logger.info(f"🧠 Processing request in worker thread: {prompt[:50]}...")
+            self.debug_logger.info(f"🧠 Processing request in worker thread: {prompt[:50]}...")
+            self.debug_logger.debug(f"📝 Full request prompt: {prompt}")
             
             # Create a new event loop for this thread
             loop = asyncio.new_event_loop()
@@ -161,30 +164,54 @@ class SovereignGUI:
             try:
                 # Process the query using the orchestrator
                 context = QueryContext(
-                    query=prompt,
-                    conversation_history=self.message_history[-10:],  # Last 10 messages for context
-                    model_choice=self.current_model,
-                    include_screen_context=self.config.screen_capture.enabled,
-                    voice_input=False
+                    user_input=prompt,
+                    timestamp=datetime.now(),
+                    session_id="gui_session",
+                    previous_queries=[msg['message'] for msg in self.message_history[-5:] if msg['sender'] == 'user'],
+                    conversation_history=self.message_history[-10:]  # Last 10 messages for context
                 )
                 
-                # Run the async query processing
-                result = loop.run_until_complete(self.orchestrator.process_query(context))
+                self.debug_logger.debug(f"📋 QueryContext created successfully: session_id={context.session_id}, user_input_length={len(context.user_input)}")
+                self.debug_logger.debug(f"📋 Previous queries count: {len(context.previous_queries)}")
+                self.debug_logger.debug(f"📋 Conversation history count: {len(context.conversation_history)}")
+                
+                # Log the orchestrator call attempt
+                self.debug_logger.info("🔄 Calling orchestrator.process_query...")
+                
+                # Run the async query processing with comprehensive error handling
+                try:
+                    result = loop.run_until_complete(self.orchestrator.process_query(prompt, context))
+                    self.debug_logger.info(f"✅ Orchestrator processing successful: model={result.model_used}, time={result.processing_time:.2f}s")
+                except Exception as orchestrator_error:
+                    self.debug_logger.error(f"❌ Orchestrator processing failed: {orchestrator_error}")
+                    self.debug_logger.error(f"🔍 Full orchestrator error traceback:\n{traceback.format_exc()}")
+                    raise orchestrator_error
                 
                 # Put the result in the response queue
                 self.response_queue.put({
                     'success': True,
                     'response': result.response,
                     'model_used': result.model_used,
-                    'complexity': result.complexity,
+                    'complexity': result.complexity_level,
                     'processing_time': result.processing_time
                 })
                 
+                self.debug_logger.info("✅ Response queued successfully")
+                
             finally:
                 loop.close()
+                self.debug_logger.debug("🔄 Event loop closed")
                 
         except Exception as e:
-            self.logger.error(f"❌ Worker thread error: {e}")
+            # Comprehensive error logging with full traceback
+            self.debug_logger.error(f"❌ Worker thread error: {e}")
+            self.debug_logger.error(f"🔍 Full error traceback:\n{traceback.format_exc()}")
+            
+            # Log context information for debugging
+            self.debug_logger.error(f"🔍 Error context - prompt length: {len(prompt)}")
+            self.debug_logger.error(f"🔍 Error context - message history length: {len(self.message_history)}")
+            self.debug_logger.error(f"🔍 Error context - orchestrator available: {self.orchestrator is not None}")
+            
             # Put error in response queue
             self.response_queue.put({
                 'success': False,
@@ -193,6 +220,7 @@ class SovereignGUI:
         finally:
             # Always mark as no longer processing
             self.is_processing = False
+            self.debug_logger.debug("🔄 Worker thread processing complete")
     
     def check_for_responses(self):
         """Check for responses from worker threads and update UI"""

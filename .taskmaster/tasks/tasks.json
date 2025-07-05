@@ -446,11 +446,71 @@
         ],
         "priority": "high",
         "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement Robust Debugging and Testing Framework",
+        "description": "Develop a comprehensive debugging and testing framework to address critical integration bugs between the GUI and backend orchestrator, with enhanced logging, error handling, and integration tests.",
+        "status": "done",
+        "dependencies": [
+          4,
+          10
+        ],
+        "priority": "high",
+        "details": "1. Fix the QueryContext initialization bug in GUI worker thread:\n   - Fixed TypeError: QueryContext.__init__() got an unexpected keyword argument 'query'\n   - Root cause: GUI worker thread was passing 'query' instead of required 'user_input' parameter\n   - Solution: Updated GUI process_request_thread() to use correct QueryContext constructor arguments\n\n2. Implement enhanced debug logging system:\n   - Created get_debug_logger() in logger.py with dedicated debug logging infrastructure\n   - Implemented file-based logging with automatic debug log files in logs/debug_YYYYMMDD.log\n   - Added full exception stack trace logging with traceback module integration\n   - Integrated debug logger with GUI worker thread for detailed request processing logs\n   - Implemented enhanced error handling with comprehensive try-catch around orchestrator.process_query()\n\n3. Develop integration test framework:\n   - Created tests/test_integration.py with 8 test cases covering full GUI-backend integration\n   - Implemented QueryContext validation tests to verify correct parameter usage\n   - Added thread communication tests to validate queue-based communication\n   - Created error handling tests to verify proper error capture and logging\n   - Implemented full workflow testing with simulation of GUI message sending to backend\n   - Added debug framework testing to validate logger creation and traceback capture\n\n4. Establish robust error handling infrastructure:\n   - Implemented comprehensive try-catch blocks with detailed error logging\n   - Added proper error propagation between components\n   - Enhanced error reporting with full context capture\n   - Integrated error handling with debug logging system\n\n5. Implement debugging tools:\n   - Added debug logging infrastructure with configurable verbosity\n   - Implemented traceback capture for comprehensive error analysis\n   - Created integration testing framework for rapid issue identification\n   - Established error handling patterns for consistent debugging",
+        "testStrategy": "1. Verify QueryContext initialization fix:\n   - Confirmed fix for TypeError: QueryContext.__init__() got an unexpected keyword argument 'query'\n   - Validated correct parameter passing between GUI and backend\n   - Verified thread safety in multi-threaded environment\n\n2. Test enhanced logging system:\n   - Verified get_debug_logger() creates properly configured loggers\n   - Validated log file creation and formatting in logs/debug_YYYYMMDD.log\n   - Tested exception handling with full traceback capture\n   - Confirmed integration with GUI worker thread logging\n\n3. Validate integration test framework:\n   - Executed all 8 integration tests with 100% pass rate\n   - Verified tests catch parameter mismatches and regression bugs\n   - Confirmed tests validate thread communication correctly\n   - Validated error handling tests properly capture and log errors\n\n4. Test error handling infrastructure:\n   - Verified comprehensive try-catch blocks capture all exceptions\n   - Validated error logging includes full context and tracebacks\n   - Confirmed proper error propagation between components\n   - Tested integration with debug logging system\n\n5. Verify debugging tools:\n   - Confirmed debug logging infrastructure works with configurable verbosity\n   - Validated traceback capture provides comprehensive error analysis\n   - Verified integration testing framework identifies issues rapidly\n   - Tested error handling patterns for consistent debugging experience",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Fix QueryContext initialization bug",
+            "description": "Fixed TypeError in QueryContext initialization by updating GUI process_request_thread() to use correct constructor arguments",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement enhanced debug logging system",
+            "description": "Created get_debug_logger() in logger.py with file-based logging, traceback capture, and GUI worker thread integration",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Develop integration test framework",
+            "description": "Created tests/test_integration.py with 8 test cases covering GUI-backend integration, parameter validation, thread communication, and error handling",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Establish robust error handling infrastructure",
+            "description": "Implemented comprehensive try-catch blocks with detailed error logging and proper error propagation between components",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement debugging tools",
+            "description": "Added debug logging infrastructure, traceback capture, integration testing framework, and consistent error handling patterns",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-05T18:41:07.860Z",
-      "updated": "2025-07-05T20:12:50.884Z",
+      "updated": "2025-07-05T20:32:53.805Z",
       "description": "Tasks for master context"
     }
   }

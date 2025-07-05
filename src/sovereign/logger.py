@@ -116,6 +116,49 @@ def get_performance_logger() -> logging.Logger:
     return logging.getLogger("sovereign.performance")
 
 
+def get_debug_logger() -> logging.Logger:
+    """
+    Get a specialized debug logger for detailed debugging and error tracking.
+    This logger provides comprehensive tracing for development and troubleshooting.
+    """
+    debug_logger = logging.getLogger("sovereign.debug")
+    
+    # Only configure if not already configured
+    if not debug_logger.handlers:
+        debug_logger.setLevel(logging.DEBUG)
+        debug_logger.propagate = False  # Don't propagate to parent loggers
+        
+        # Create logs directory
+        logs_dir = Path("logs")
+        logs_dir.mkdir(exist_ok=True)
+        
+        # Detailed formatter with full context
+        debug_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s() - %(message)s'
+        )
+        
+        # Console handler for immediate feedback
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.DEBUG)
+        console_handler.setFormatter(debug_formatter)
+        debug_logger.addHandler(console_handler)
+        
+        # Dedicated debug file handler
+        debug_log_file = logs_dir / f"debug_{datetime.now().strftime('%Y%m%d')}.log"
+        debug_file_handler = logging.handlers.RotatingFileHandler(
+            debug_log_file,
+            maxBytes=20*1024*1024,  # 20MB for detailed debug logs
+            backupCount=10
+        )
+        debug_file_handler.setLevel(logging.DEBUG)
+        debug_file_handler.setFormatter(debug_formatter)
+        debug_logger.addHandler(debug_file_handler)
+        
+        debug_logger.info("Debug logger initialized for comprehensive error tracking")
+    
+    return debug_logger
+
+
 class PerformanceTimer:
     """Context manager for timing operations"""
     
