@@ -1,0 +1,29 @@
+# Task ID: 5
+# Title: Implement External Model Access
+# Status: pending
+# Dependencies: 4
+# Priority: medium
+# Description: Develop the capability to route specific requests through external services like OpenRouter when necessary, while maintaining the core philosophy of local-first operation.
+# Details:
+1. Create ExternalModelConnector class with methods:
+   - initialize(config)
+   - route_request(query, context)
+   - determine_external_need(query, context)
+2. Implement secure API integration with OpenRouter
+3. Create clear criteria for when to use external services:
+   - Specialized knowledge requirements
+   - Complex tool use cases
+   - User explicit request
+4. Add configuration options for API keys and endpoints
+5. Implement request/response caching to minimize external calls
+6. Add user notification and consent system for external routing
+7. Create detailed logging of external service usage
+8. Implement fallback to local-only mode if external services are unavailable
+
+# Test Strategy:
+1. Test accuracy of external routing decisions
+2. Verify secure handling of API keys
+3. Measure performance impact of external routing
+4. Test caching effectiveness for repeated queries
+5. Validate user notification and consent mechanisms
+6. Verify fallback behavior when external services are unavailable

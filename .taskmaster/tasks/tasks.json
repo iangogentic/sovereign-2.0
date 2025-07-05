@@ -1,0 +1,457 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Architecture and Environment",
+        "description": "Create the foundational project structure and development environment for the Sovereign AI Agent, ensuring all dependencies are properly configured for local execution.",
+        "details": "1. Initialize a new Python project with proper directory structure\n2. Set up virtual environment with Python 3.10+\n3. Create requirements.txt with essential dependencies:\n   - PyTorch with CUDA support\n   - Transformers library for model loading\n   - FastAPI for potential API endpoints\n   - SQLite for local storage\n   - Necessary GPU acceleration libraries\n4. Configure GPU detection and optimization settings\n5. Create configuration files for environment variables\n6. Implement logging system\n7. Setup basic CLI entry point with single-command launch capability\n8. Document system requirements (NVIDIA RTX 5070 Ti 16GB or equivalent)",
+        "testStrategy": "1. Verify environment setup on target hardware\n2. Test GPU detection and CUDA availability\n3. Validate that all dependencies install correctly\n4. Ensure the application launches with a single command\n5. Verify logging system captures appropriate information",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement 'Talker' Model Integration",
+        "description": "Integrate the fast, local conversational model (Gemma2:9b) via Ollama to serve as the primary interface for user interactions, ensuring responses are generated in under 2 seconds.",
+        "status": "done",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "1. Implement an OllamaClient class to handle communication with the Ollama server at http://localhost:11434\n2. Create a TalkerModel class that uses the OllamaClient to make API calls to the /api/generate endpoint\n3. Implement response generation:\n   - generate_response method should send the prompt to Ollama and return the streamed response\n   - detect_complex_query(prompt, context)\n4. Add configuration in config.py for the Ollama model name (e.g., 'gemma2:9b') and the API endpoint\n5. Implement response time tracking to ensure sub-2-second goal\n6. Implement proper error handling for Ollama server connectivity\n7. Add graceful fallback if Ollama is not running or model is not available",
+        "testStrategy": "1. Measure response times for standard queries (target: <2 seconds)\n2. Test with various prompt lengths and complexities\n3. Verify connectivity with Ollama server\n4. Test error handling when Ollama server is unavailable\n5. Validate quality of responses against baseline expectations\n6. Test streaming response functionality",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement OllamaClient class",
+            "description": "Created a full async HTTP client using aiohttp in src/sovereign/ollama_client.py with health checking, model listing, pulling capabilities, streaming and non-streaming text generation, comprehensive error handling with custom OllamaError exception, and proper session management and cleanup.",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement TalkerModel class",
+            "description": "Created TalkerModel in src/sovereign/talker_model.py as the primary interface for fast conversational AI via Ollama, with automatic initialization, health checks, model verification, sub-2-second response generation, intelligent complexity detection using regex patterns, performance tracking, and proper system prompt for Sovereign personality.",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Update configuration",
+            "description": "Updated src/sovereign/config.py with Ollama-specific settings (endpoint, temperature, top_p, streaming) and updated model names to use Ollama models (gemma2:9b, deepseek-r1:14b).",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Integrate with CLI",
+            "description": "Updated src/sovereign/cli.py to add --test-talker command, use TalkerModel instead of echo responses in the interactive loop, implement real-time complexity detection with handoff messaging, and add performance statistics command.",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Add dependencies and testing",
+            "description": "Added aiohttp to requirements.txt and created a comprehensive test suite with 14 tests (12 passing) covering initialization, complexity detection, performance stats, and error handling. Tests confirm Ollama integration works correctly.",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement performance features",
+            "description": "Added response time tracking with target of <2 seconds, automatic complexity detection for Thinker model handoff, graceful error handling and fallback messages, and performance statistics and monitoring.",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Fix remaining test failures",
+            "description": "Address the 2 failing tests identified during implementation to achieve 100% test passing rate.",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement 'Thinker' Model Integration",
+        "description": "Integrate the larger, more capable local model (DeepSeek-R1:14b) for complex reasoning, multi-step problem-solving, code generation, and tool use.",
+        "status": "done",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "1. Download and integrate DeepSeek-R1:14b model\n2. Implement model loading with optimizations:\n   - Configure for maximum GPU utilization\n   - Implement efficient memory management\n3. Create a ThinkerModel class with methods:\n   - initialize(config)\n   - deep_reasoning(prompt, context)\n   - code_generation(prompt, context)\n   - tool_use_planning(prompt, context, available_tools)\n   - analysis(prompt, context)\n   - problem_solving(prompt, context)\n4. Implement specialized prompting templates for different reasoning tasks\n5. Add configuration for model parameters including:\n   - thinker_timeout (60s for complex reasoning)\n   - thinker_temperature (0.3 for focused responses)\n   - thinker_max_tokens (4096 for detailed responses)\n   - thinker_context_window setting\n6. Create performance monitoring for resource usage\n7. Implement graceful degradation if GPU resources are insufficient\n8. Implement intelligent handoff logic between TalkerModel and ThinkerModel",
+        "testStrategy": "1. Test complex reasoning capabilities with multi-step problems\n2. Evaluate code generation quality across multiple languages\n3. Measure response times for complex queries\n4. Test memory usage during extended reasoning tasks\n5. Verify tool use planning capabilities\n6. Test automatic task type detection functionality\n7. Verify handoff logic between TalkerModel and ThinkerModel\n8. Test graceful fallbacks when ThinkerModel is unavailable",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement ThinkerModel class",
+            "description": "Create ThinkerModel class in src/sovereign/thinker_model.py with async OllamaClient integration for DeepSeek-R1:14b model",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement TaskType enum and detection",
+            "description": "Create TaskType enum with 5 specialized task types (DEEP_REASONING, CODE_GENERATION, TOOL_USE_PLANNING, ANALYSIS, PROBLEM_SOLVING) and automatic task type detection using keyword pattern matching",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement specialized system prompts",
+            "description": "Create optimized system prompts for each task type to enhance model performance for specific tasks",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Enhance configuration",
+            "description": "Update src/sovereign/config.py with thinker_timeout, thinker_temperature, thinker_max_tokens, and thinker_context_window settings",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement CLI integration",
+            "description": "Update src/sovereign/cli.py with ThinkerModel import, initialization, handoff logic, and test commands",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement core processing methods",
+            "description": "Create initialize(), auto_process(), deep_reasoning(), code_generation(), tool_use_planning(), analysis(), problem_solving(), and get_performance_stats() methods",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement performance tracking",
+            "description": "Add comprehensive performance metrics tracking including processing times and context lengths",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Create comprehensive tests",
+            "description": "Develop tests/test_thinker_model.py with 16 test cases covering all functionality",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Develop Intelligent Orchestration System",
+        "description": "Create the orchestration logic that manages the handoff between the 'Talker' and 'Thinker' models, ensuring seamless integration and appropriate model selection based on query complexity.",
+        "status": "done",
+        "dependencies": [
+          2,
+          3
+        ],
+        "priority": "high",
+        "details": "1. Implement ModelOrchestrator class with methods:\n   - process_query(user_input, context)\n   - determine_complexity(query, context)\n   - handle_model_handoff(query, context)\n   - integrate_responses(thinker_response)\n2. Create advanced complexity detection algorithm with 4 levels (Simple, Moderate, Complex, Very Complex):\n   - Comprehensive regex patterns for different query types\n   - Context-aware complexity scoring with confidence levels\n   - Smart model selection logic based on complexity and context\n3. Implement intelligent response caching system:\n   - Caching based on query complexity and response quality\n   - Cache expiration with configurable TTL (default 24 hours)\n   - Automatic cache cleaning when max size reached\n   - Query hashing for consistent cache keys\n4. Develop advanced handoff logic:\n   - Uncertainty detection in Talker responses\n   - Short response detection for complex queries\n   - Keyword-based handoff triggers\n   - Context-aware handoff decisions\n   - Response integration from both models\n5. Implement comprehensive telemetry system:\n   - Query statistics tracking (total, by model, handoffs)\n   - Performance metrics (response times, cache hit rates)\n   - Error tracking and uptime monitoring\n   - Complexity distribution analysis\n   - Real-time status reporting\n6. Create OrchestratorConfig class in config.py:\n   - Configurable thresholds and settings\n   - Cache and telemetry configuration options\n   - Handoff confidence settings\n7. Integrate with CLI:\n   - Full orchestrator integration\n   - New --test-orchestrator command\n   - Enhanced status, stats, and cache commands\n   - Debug mode with detailed query information\n   - Session context management",
+        "testStrategy": "1. Test accuracy of complexity detection algorithm across all 4 complexity levels\n2. Measure end-to-end response time including handoffs\n3. Verify context preservation during model switching\n4. Test with various query types to ensure appropriate model selection\n5. Validate graceful handling of edge cases and failures\n6. Test caching system functionality and performance\n7. Verify telemetry data collection and reporting\n8. Test CLI integration and commands\n9. Validate configuration system and settings\n10. Comprehensive test suite with unit and integration tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core ModelOrchestrator Class",
+            "description": "Develop the main orchestration class with advanced complexity detection and model selection logic",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Response Caching System",
+            "description": "Create intelligent caching system with TTL, automatic cleaning, and query hashing",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Develop Advanced Handoff Logic",
+            "description": "Implement sophisticated logic for Talker→Thinker transitions with uncertainty detection and context-aware decisions",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Comprehensive Telemetry System",
+            "description": "Implement metrics tracking for queries, performance, errors, and complexity distribution",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Configuration Integration",
+            "description": "Create OrchestratorConfig class with configurable thresholds and settings",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Integrate with CLI",
+            "description": "Add orchestrator commands and features to the command-line interface",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create Comprehensive Test Suite",
+            "description": "Develop extensive testing for all orchestrator functionality with unit and integration tests",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement External Model Access",
+        "description": "Develop the capability to route specific requests through external services like OpenRouter when necessary, while maintaining the core philosophy of local-first operation.",
+        "details": "1. Create ExternalModelConnector class with methods:\n   - initialize(config)\n   - route_request(query, context)\n   - determine_external_need(query, context)\n2. Implement secure API integration with OpenRouter\n3. Create clear criteria for when to use external services:\n   - Specialized knowledge requirements\n   - Complex tool use cases\n   - User explicit request\n4. Add configuration options for API keys and endpoints\n5. Implement request/response caching to minimize external calls\n6. Add user notification and consent system for external routing\n7. Create detailed logging of external service usage\n8. Implement fallback to local-only mode if external services are unavailable",
+        "testStrategy": "1. Test accuracy of external routing decisions\n2. Verify secure handling of API keys\n3. Measure performance impact of external routing\n4. Test caching effectiveness for repeated queries\n5. Validate user notification and consent mechanisms\n6. Verify fallback behavior when external services are unavailable",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Develop Real-Time Screen Context System",
+        "description": "Implement the background screen capture, OCR text extraction, and context integration system to allow the AI to understand and reference the user's current screen content.",
+        "details": "1. Create ScreenContextManager class with methods:\n   - initialize(config)\n   - capture_screen()\n   - extract_text(screenshot)\n   - update_context(text, screenshot_reference)\n   - toggle_capture(enabled)\n2. Implement configurable screenshot capture interval (default: 3-5 seconds)\n3. Integrate high-performance OCR library (e.g., Tesseract or commercial alternative)\n4. Create efficient storage mechanism for screenshots and extracted text\n5. Implement privacy controls:\n   - Clear toggle in UI\n   - Automatic disabling for sensitive applications\n   - Local-only storage of all captures\n6. Add context windowing to manage memory usage\n7. Implement screenshot reference system for AI to reference specific screen elements",
+        "testStrategy": "1. Measure OCR accuracy across different screen content types\n2. Test performance impact of background capture\n3. Verify privacy controls function correctly\n4. Test context integration with AI responses\n5. Measure memory usage during extended operation\n6. Validate screenshot reference system accuracy",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Voice Interface",
+        "description": "Develop the complete voice interface including speech recognition, text-to-speech output, voice activity detection, and wake word activation for hands-free operation.",
+        "details": "1. Create VoiceInterfaceManager class with methods:\n   - initialize(config)\n   - start_listening()\n   - process_audio(audio_chunk)\n   - detect_wake_word(audio)\n   - transcribe_speech(audio)\n   - synthesize_speech(text)\n2. Integrate high-quality speech-to-text engine (e.g., Whisper local model)\n3. Implement text-to-speech system with natural voice (e.g., VITS or similar local model)\n4. Develop Voice Activity Detection using efficient local algorithm\n5. Implement wake word detection (\"Hey Sovereign\") using lightweight local model\n6. Create audio input/output handling with proper device selection\n7. Add voice profile customization options\n8. Implement background noise filtering\n9. Create visual indicators for voice system status",
+        "testStrategy": "1. Test speech recognition accuracy in various environments\n2. Measure wake word detection reliability (target: 99%)\n3. Test voice activity detection accuracy\n4. Evaluate text-to-speech naturalness and clarity\n5. Measure latency of full voice interaction loop\n6. Test in noisy environments\n7. Verify proper device handling across different audio setups",
+        "priority": "high",
+        "dependencies": [
+          1,
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Develop External Tool Use & Integration Framework",
+        "description": "Create a robust function-calling architecture that allows the 'Thinker' model to execute specific tasks and interact with external APIs, including internet search capabilities.",
+        "details": "1. Create ToolIntegrationFramework class with methods:\n   - register_tool(tool_definition)\n   - execute_tool_call(tool_name, parameters)\n   - parse_tool_request(model_output)\n2. Implement core tools:\n   - InternetSearch tool using a privacy-focused search API\n   - SystemInfo tool for local system information\n   - FileAccess tool with appropriate permissions\n   - CalculationTool for complex math\n3. Create standardized tool definition format\n4. Implement secure parameter validation\n5. Add result parsing and formatting for AI consumption\n6. Create tool usage logging system\n7. Implement extensibility mechanism for adding custom tools\n8. Add user permission system for sensitive tool operations",
+        "testStrategy": "1. Test each core tool for functionality and accuracy\n2. Verify secure handling of tool parameters\n3. Test extensibility by adding a custom tool\n4. Validate error handling for tool execution failures\n5. Test integration with the 'Thinker' model\n6. Verify user permission system for sensitive operations\n7. Measure performance impact of tool execution",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Long-Term Memory (RAG) System",
+        "description": "Develop the local, persistent database for conversation history and implement the Retrieval-Augmented Generation pipeline for semantic search and contextual recall.",
+        "details": "1. Create MemoryManager class with methods:\n   - initialize(config)\n   - store_interaction(user_input, ai_response, metadata)\n   - semantic_search(query, limit)\n   - generate_embeddings(text)\n   - retrieve_context(query, current_context)\n2. Implement local SQLite database with proper schema:\n   - Conversations table\n   - Embeddings table\n   - Metadata table\n3. Integrate local embedding model for semantic representation\n4. Implement vector similarity search\n5. Create context window management for memory retrieval\n6. Add memory pruning and maintenance capabilities\n7. Implement privacy controls for memory system\n8. Create memory export/import functionality",
+        "testStrategy": "1. Test semantic search accuracy with various queries\n2. Measure embedding generation performance\n3. Verify database persistence across application restarts\n4. Test context retrieval relevance\n5. Validate memory pruning functionality\n6. Measure storage requirements over time\n7. Test export/import functionality",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Design and Implement User Interface",
+        "description": "Create a beautiful, modern, and intuitive user interface with clear indicators for AI status and seamless switching between typing and speaking.",
+        "status": "done",
+        "dependencies": [
+          1,
+          7
+        ],
+        "priority": "high",
+        "details": "1. Create UI components:\n   - Main chat interface\n   - Status indicators (listening, thinking, speaking)\n   - Settings panel\n   - Tool output display\n   - Screen context toggle\n2. Implement responsive design for various window sizes\n3. Create smooth animations for status transitions\n4. Implement keyboard shortcuts for common actions\n5. Add theme customization (light/dark)\n6. Create accessibility features\n7. Implement message formatting for code, lists, etc.\n8. Add visual indicators for model switching (Talker/Thinker)\n9. Create system tray integration",
+        "testStrategy": "1. Test UI responsiveness across different screen sizes\n2. Verify all status indicators function correctly\n3. Test keyboard shortcuts\n4. Validate accessibility features\n5. Test theme switching\n6. Verify message formatting for various content types\n7. Test system tray functionality",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core Interface Components",
+            "description": "Create the main chat interface, status indicators, and settings panel using CustomTkinter",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement AI Integration Features",
+            "description": "Add visual indicators for Talker/Thinker models, smart orchestration, voice interface, and response caching",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement User Experience Features",
+            "description": "Create settings panel, keyboard shortcuts, message management, and system tray integration",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Accessibility & Polish Features",
+            "description": "Add multi-line input, auto-scroll, error handling, and performance optimizations",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create Main GUI Files",
+            "description": "Develop src/sovereign/gui.py, run_sovereign.py, and test_gui.py",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Modify Existing Files for GUI Integration",
+            "description": "Update requirements.txt, __init__.py, and cli.py to support GUI functionality",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Test GUI Implementation",
+            "description": "Verify imports, configuration integration, window creation, and CLI flag functionality",
+            "status": "completed",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Implement Performance Optimization and Monitoring",
+        "description": "Develop systems to ensure the application meets the technical and performance benchmarks specified in the PRD, including response latency, voice reliability, and stability.",
+        "details": "1. Create PerformanceMonitor class with methods:\n   - track_response_time(start, end, query_type)\n   - monitor_memory_usage()\n   - track_voice_reliability(success, failure)\n   - log_performance_metrics()\n2. Implement performance dashboards in UI\n3. Create automated performance testing suite\n4. Implement memory leak detection\n5. Add GPU utilization monitoring\n6. Create performance profiling tools\n7. Implement automatic optimization suggestions\n8. Add crash recovery mechanisms\n9. Create detailed performance logging",
+        "testStrategy": "1. Verify response times meet requirements (<2s for Talker)\n2. Test voice interface reliability (target: 99%)\n3. Run extended stability tests (24+ hours)\n4. Measure memory usage over time to detect leaks\n5. Test crash recovery functionality\n6. Validate performance logging accuracy",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          7,
+          10
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "System Integration and End-to-End Testing",
+        "description": "Integrate all components into a cohesive system and perform comprehensive end-to-end testing to ensure the Sovereign AI Agent functions as specified in the PRD.",
+        "details": "1. Create integration test suite covering:\n   - Model orchestration flow\n   - Voice interface integration\n   - Screen context integration\n   - Memory system integration\n   - Tool use integration\n2. Implement automated end-to-end tests\n3. Create user acceptance test scenarios\n4. Develop performance benchmark suite\n5. Implement system-wide logging and diagnostics\n6. Create installation and setup scripts\n7. Develop comprehensive documentation\n8. Implement telemetry for anonymous usage statistics (opt-in only)",
+        "testStrategy": "1. Run full end-to-end test suite\n2. Conduct user acceptance testing with target user profiles\n3. Perform stress testing under heavy load\n4. Test installation process on fresh systems\n5. Validate all PRD requirements are met\n6. Conduct security and privacy audit\n7. Test across different hardware configurations",
+        "priority": "high",
+        "dependencies": [
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Configure and Document Development Environment",
+        "description": "Set up and document the Python virtual environment with proper CUDA-compatible PyTorch installation sequence to ensure consistent GPU acceleration across development machines.",
+        "details": "1. Create detailed documentation for setting up the development environment:\n   - Python version requirements (3.10+)\n   - Required system dependencies (CUDA toolkit version, cuDNN)\n   - GPU hardware requirements and driver versions\n\n2. Document the critical installation sequence:\n   - Create Python virtual environment: `python -m venv venv`\n   - Activate virtual environment: `source venv/bin/activate` (Linux/Mac) or `venv\\Scripts\\activate` (Windows)\n   - Install CUDA-compatible PyTorch first: `pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 --extra-index-url https://download.pytorch.org/whl/cu118`\n   - Install remaining dependencies: `pip install -r requirements.txt`\n   - Verify GPU acceleration with test script:\n```python\nimport torch\nprint(f\"PyTorch version: {torch.__version__}\")\nprint(f\"CUDA available: {torch.cuda.is_available()}\")\nprint(f\"CUDA device count: {torch.cuda.device_count()}\")\nif torch.cuda.is_available():\n    print(f\"CUDA device name: {torch.cuda.get_device_name(0)}\")\n```\n\n3. Create troubleshooting guide for common issues:\n   - CUDA version mismatch between PyTorch and system\n   - GPU not detected by PyTorch\n   - CUDA out of memory errors\n   - cuDNN not found\n   - Common error messages and their solutions\n\n4. Create a setup script (`setup_env.py` or `setup_env.sh`) that:\n   - Checks system requirements\n   - Creates virtual environment\n   - Installs dependencies in the correct order\n   - Verifies the installation\n\n5. Document environment variables needed:\n   - CUDA_VISIBLE_DEVICES\n   - PYTORCH_CUDA_ALLOC_CONF\n   - Other relevant environment variables\n\n6. Create a development environment validation script that tests:\n   - Model loading capabilities\n   - Basic inference on GPU\n   - Memory usage monitoring\n   - Performance benchmarking",
+        "testStrategy": "1. Test the environment setup process on multiple machines with different GPU configurations:\n   - NVIDIA consumer GPUs (RTX series)\n   - NVIDIA professional GPUs (if available)\n   - Systems with multiple GPUs\n   - Systems with minimum required specifications\n\n2. Verify GPU acceleration works correctly:\n   - Run the validation script to confirm PyTorch detects CUDA\n   - Perform a simple model inference test and verify it uses GPU\n   - Check memory allocation on GPU during inference\n   - Compare inference speed between CPU and GPU to confirm acceleration\n\n3. Test the troubleshooting guide:\n   - Deliberately create common error scenarios\n   - Follow the troubleshooting steps to resolve them\n   - Update guide with any additional issues encountered\n\n4. Validate the setup script:\n   - Test on a clean system without any dependencies\n   - Verify it correctly installs all components in the right order\n   - Confirm the validation checks work as expected\n\n5. Test environment consistency:\n   - Have multiple team members follow the documentation to set up their environments\n   - Compare environment configurations to ensure consistency\n   - Verify all developers can run the application with GPU acceleration\n\n6. Document any hardware-specific configurations or issues encountered during testing",
+        "status": "done",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-05T18:41:07.860Z",
+      "updated": "2025-07-05T20:12:50.884Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

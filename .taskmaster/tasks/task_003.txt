@@ -1,0 +1,87 @@
+# Task ID: 3
+# Title: Implement 'Thinker' Model Integration
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Integrate the larger, more capable local model (DeepSeek-R1:14b) for complex reasoning, multi-step problem-solving, code generation, and tool use.
+# Details:
+1. Download and integrate DeepSeek-R1:14b model
+2. Implement model loading with optimizations:
+   - Configure for maximum GPU utilization
+   - Implement efficient memory management
+3. Create a ThinkerModel class with methods:
+   - initialize(config)
+   - deep_reasoning(prompt, context)
+   - code_generation(prompt, context)
+   - tool_use_planning(prompt, context, available_tools)
+   - analysis(prompt, context)
+   - problem_solving(prompt, context)
+4. Implement specialized prompting templates for different reasoning tasks
+5. Add configuration for model parameters including:
+   - thinker_timeout (60s for complex reasoning)
+   - thinker_temperature (0.3 for focused responses)
+   - thinker_max_tokens (4096 for detailed responses)
+   - thinker_context_window setting
+6. Create performance monitoring for resource usage
+7. Implement graceful degradation if GPU resources are insufficient
+8. Implement intelligent handoff logic between TalkerModel and ThinkerModel
+
+# Test Strategy:
+1. Test complex reasoning capabilities with multi-step problems
+2. Evaluate code generation quality across multiple languages
+3. Measure response times for complex queries
+4. Test memory usage during extended reasoning tasks
+5. Verify tool use planning capabilities
+6. Test automatic task type detection functionality
+7. Verify handoff logic between TalkerModel and ThinkerModel
+8. Test graceful fallbacks when ThinkerModel is unavailable
+
+# Subtasks:
+## 1. Implement ThinkerModel class [completed]
+### Dependencies: None
+### Description: Create ThinkerModel class in src/sovereign/thinker_model.py with async OllamaClient integration for DeepSeek-R1:14b model
+### Details:
+
+
+## 2. Implement TaskType enum and detection [completed]
+### Dependencies: None
+### Description: Create TaskType enum with 5 specialized task types (DEEP_REASONING, CODE_GENERATION, TOOL_USE_PLANNING, ANALYSIS, PROBLEM_SOLVING) and automatic task type detection using keyword pattern matching
+### Details:
+
+
+## 3. Implement specialized system prompts [completed]
+### Dependencies: None
+### Description: Create optimized system prompts for each task type to enhance model performance for specific tasks
+### Details:
+
+
+## 4. Enhance configuration [completed]
+### Dependencies: None
+### Description: Update src/sovereign/config.py with thinker_timeout, thinker_temperature, thinker_max_tokens, and thinker_context_window settings
+### Details:
+
+
+## 5. Implement CLI integration [completed]
+### Dependencies: None
+### Description: Update src/sovereign/cli.py with ThinkerModel import, initialization, handoff logic, and test commands
+### Details:
+
+
+## 6. Implement core processing methods [completed]
+### Dependencies: None
+### Description: Create initialize(), auto_process(), deep_reasoning(), code_generation(), tool_use_planning(), analysis(), problem_solving(), and get_performance_stats() methods
+### Details:
+
+
+## 7. Implement performance tracking [completed]
+### Dependencies: None
+### Description: Add comprehensive performance metrics tracking including processing times and context lengths
+### Details:
+
+
+## 8. Create comprehensive tests [completed]
+### Dependencies: None
+### Description: Develop tests/test_thinker_model.py with 16 test cases covering all functionality
+### Details:
+
+

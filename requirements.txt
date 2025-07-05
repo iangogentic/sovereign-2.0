@@ -1,0 +1,90 @@
+# Core AI and ML dependencies
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+transformers>=4.35.0
+accelerate>=0.24.0
+bitsandbytes>=0.41.0
+
+# GPU acceleration and optimization
+nvidia-ml-py3>=7.352.0
+pynvml>=11.4.1
+
+# Web and API framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+
+# Database and storage
+sqlalchemy>=2.0.0
+chromadb>=0.4.0
+
+# Audio processing for voice interface
+sounddevice>=0.4.6
+librosa>=0.10.1
+speechrecognition>=3.10.0
+pydub>=0.25.1
+pyaudio>=0.2.11
+
+# Text-to-speech
+pyttsx3>=2.90
+gTTS>=2.4.0
+
+# Image processing and OCR
+pillow>=10.1.0
+pytesseract>=0.3.10
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Screen capture
+mss>=9.0.1
+pyautogui>=0.9.54
+
+# System and utilities
+psutil>=5.9.0
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+click>=8.1.0
+rich>=13.7.0
+tqdm>=4.66.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.11.0
+flake8>=6.1.0
+mypy>=1.7.0
+
+# Optional: External API integration
+openai>=1.3.0
+requests>=2.31.0
+httpx>=0.25.0
+aiohttp>=3.9.0
+
+# Configuration and logging
+pyyaml>=6.0.1
+configparser>=6.0.0
+
+# Vector database for RAG
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.2
+
+# Wake word detection
+pvporcupine>=3.0.0
+
+# Advanced voice processing
+openai-whisper>=20231117
+webrtcvad>=2.0.10
+noisereduce>=3.0.0
+scipy>=1.11.0
+
+# GUI and user interface
+customtkinter>=5.2.0
+tkinter-tooltip>=2.1.0
+pystray>=0.19.4
+pillow>=10.1.0  # Already included above for OCR
+
+# Additional utilities
+pathlib2>=2.3.7
+typing-extensions>=4.8.0
+dataclasses-json>=0.6.0 

@@ -1,0 +1,30 @@
+# Task ID: 6
+# Title: Develop Real-Time Screen Context System
+# Status: pending
+# Dependencies: 1
+# Priority: medium
+# Description: Implement the background screen capture, OCR text extraction, and context integration system to allow the AI to understand and reference the user's current screen content.
+# Details:
+1. Create ScreenContextManager class with methods:
+   - initialize(config)
+   - capture_screen()
+   - extract_text(screenshot)
+   - update_context(text, screenshot_reference)
+   - toggle_capture(enabled)
+2. Implement configurable screenshot capture interval (default: 3-5 seconds)
+3. Integrate high-performance OCR library (e.g., Tesseract or commercial alternative)
+4. Create efficient storage mechanism for screenshots and extracted text
+5. Implement privacy controls:
+   - Clear toggle in UI
+   - Automatic disabling for sensitive applications
+   - Local-only storage of all captures
+6. Add context windowing to manage memory usage
+7. Implement screenshot reference system for AI to reference specific screen elements
+
+# Test Strategy:
+1. Measure OCR accuracy across different screen content types
+2. Test performance impact of background capture
+3. Verify privacy controls function correctly
+4. Test context integration with AI responses
+5. Measure memory usage during extended operation
+6. Validate screenshot reference system accuracy

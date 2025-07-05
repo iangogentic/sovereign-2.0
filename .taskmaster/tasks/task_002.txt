@@ -1,0 +1,68 @@
+# Task ID: 2
+# Title: Implement 'Talker' Model Integration
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Integrate the fast, local conversational model (Gemma2:9b) via Ollama to serve as the primary interface for user interactions, ensuring responses are generated in under 2 seconds.
+# Details:
+1. Implement an OllamaClient class to handle communication with the Ollama server at http://localhost:11434
+2. Create a TalkerModel class that uses the OllamaClient to make API calls to the /api/generate endpoint
+3. Implement response generation:
+   - generate_response method should send the prompt to Ollama and return the streamed response
+   - detect_complex_query(prompt, context)
+4. Add configuration in config.py for the Ollama model name (e.g., 'gemma2:9b') and the API endpoint
+5. Implement response time tracking to ensure sub-2-second goal
+6. Implement proper error handling for Ollama server connectivity
+7. Add graceful fallback if Ollama is not running or model is not available
+
+# Test Strategy:
+1. Measure response times for standard queries (target: <2 seconds)
+2. Test with various prompt lengths and complexities
+3. Verify connectivity with Ollama server
+4. Test error handling when Ollama server is unavailable
+5. Validate quality of responses against baseline expectations
+6. Test streaming response functionality
+
+# Subtasks:
+## 1. Implement OllamaClient class [completed]
+### Dependencies: None
+### Description: Created a full async HTTP client using aiohttp in src/sovereign/ollama_client.py with health checking, model listing, pulling capabilities, streaming and non-streaming text generation, comprehensive error handling with custom OllamaError exception, and proper session management and cleanup.
+### Details:
+
+
+## 2. Implement TalkerModel class [completed]
+### Dependencies: None
+### Description: Created TalkerModel in src/sovereign/talker_model.py as the primary interface for fast conversational AI via Ollama, with automatic initialization, health checks, model verification, sub-2-second response generation, intelligent complexity detection using regex patterns, performance tracking, and proper system prompt for Sovereign personality.
+### Details:
+
+
+## 3. Update configuration [completed]
+### Dependencies: None
+### Description: Updated src/sovereign/config.py with Ollama-specific settings (endpoint, temperature, top_p, streaming) and updated model names to use Ollama models (gemma2:9b, deepseek-r1:14b).
+### Details:
+
+
+## 4. Integrate with CLI [completed]
+### Dependencies: None
+### Description: Updated src/sovereign/cli.py to add --test-talker command, use TalkerModel instead of echo responses in the interactive loop, implement real-time complexity detection with handoff messaging, and add performance statistics command.
+### Details:
+
+
+## 5. Add dependencies and testing [completed]
+### Dependencies: None
+### Description: Added aiohttp to requirements.txt and created a comprehensive test suite with 14 tests (12 passing) covering initialization, complexity detection, performance stats, and error handling. Tests confirm Ollama integration works correctly.
+### Details:
+
+
+## 6. Implement performance features [completed]
+### Dependencies: None
+### Description: Added response time tracking with target of <2 seconds, automatic complexity detection for Thinker model handoff, graceful error handling and fallback messages, and performance statistics and monitoring.
+### Details:
+
+
+## 7. Fix remaining test failures [done]
+### Dependencies: None
+### Description: Address the 2 failing tests identified during implementation to achieve 100% test passing rate.
+### Details:
+
+

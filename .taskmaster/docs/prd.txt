@@ -1,0 +1,137 @@
+Product Requirements Document: Sovereign AI Agent
+Version: 1.0
+
+Author: AI Assistant
+
+1. Project Vision & Core Philosophy
+1.1. Vision: To create a private, powerful, and seamlessly integrated AI assistant that runs entirely on a user's local machine, putting them in complete control of their data and computational resources.
+
+1.2. Core Philosophy: The project is built on the principle of AI Sovereignty. This means the user owns and controls their AI completely. The system must be designed to operate entirely on the user's local hardware for all core functionality, ensuring privacy and eliminating dependencies on third-party cloud services.
+
+2. Target User
+The target user is a tech-savvy professional, developer, researcher, or power user who:
+
+Owns a high-performance NVIDIA GPU (e.g., RTX 5070 Ti 16GB).
+
+Values data privacy and wants to keep their interactions off the cloud.
+
+Requires a high-performance AI for tasks ranging from quick queries to complex, multi-step reasoning.
+
+Desires a seamless, multi-modal interface (text and voice) that integrates with their desktop environment.
+
+3. Core Features & Functional Requirements
+3.1. Dual-Model "Stacked" Architecture
+Requirement 3.1.1: "Talker" Model:
+
+Implementation: Must use a fast, local conversational model (e.g., Gemma2:9b).
+
+Performance: Must provide responses in under 2 seconds for typical chat interactions.
+
+Function: Serves as the primary interface for all user conversations.
+
+Requirement 3.1.2: "Thinker" Model:
+
+Implementation: Must use a larger, more capable local model for complex reasoning (e.g., DeepSeek-R1:14b).
+
+Function: Handles tasks that require deep analysis, multi-step problem-solving, code generation, and tool use.
+
+Requirement 3.1.3: Intelligent Orchestration:
+
+Logic: The "Talker" model must be the default point of interaction. It must be capable of identifying when a user's query exceeds its capabilities.
+
+Handoff: When a query is complex, the "Talker" must inform the user it is consulting the "Thinker" and then pass the query and relevant context.
+
+Integration: Once the "Thinker" completes its task, its output must be passed back to the "Talker," which will then present the final, integrated response to the user.
+
+Requirement 3.1.4: External Model Access:
+
+The system must have the capability to route specific requests (especially for tool use or specialized knowledge) through an external service like OpenRouter when necessary.
+
+3.2. Real-Time Screen Context
+Requirement 3.2.1: Background Screen Capture:
+
+The application must be able to capture screenshots of the user's primary display in the background at a configurable interval (defaulting to every 3-5 seconds).
+
+Requirement 3.2.2: OCR Text Extraction:
+
+The system must perform Optical Character Recognition (OCR) on captured screenshots to extract all visible text.
+
+Requirement 3.2.3: Context Integration:
+
+The extracted text and a reference to the screenshot must be available as context for the AI models. The AI must be able to answer questions about the content currently on the user's screen.
+
+Requirement 3.2.4: Privacy Controls:
+
+The user interface must include a clear and easily accessible toggle to turn the screen capture functionality on and off.
+
+3.3. Voice Interface
+Requirement 3.3.1: Speech Recognition:
+
+The system must integrate a high-quality speech-to-text engine to transcribe user voice commands accurately.
+
+Requirement 3.3.2: Text-to-Speech Output:
+
+The AI's responses must be converted to natural-sounding speech and played back to the user.
+
+Requirement 3.3.3: Voice Activity Detection (VAD):
+
+The system must use VAD to intelligently detect when the user is speaking to avoid constant, unnecessary transcription.
+
+Requirement 3.3.4: Wake Word Activation:
+
+A wake word (e.g., "Hey Sovereign") must be implemented to activate the voice interface for hands-free operation.
+
+3.4. External Tool Use & Integration
+Requirement 3.4.1: Internet Search:
+
+The AI must be able to perform real-time web searches to answer questions about current events or information not present in its local knowledge base.
+
+Requirement 3.4.2: Function Calling Framework:
+
+The system must have a robust function-calling architecture that allows the "Thinker" model to execute specific, predefined tasks and interact with external APIs.
+
+Requirement 3.4.3: Extensibility:
+
+The tool integration system must be designed to be extensible, making it straightforward for developers to add new tools and capabilities in the future.
+
+3.5. Long-Term Memory (RAG)
+Requirement 3.5.1: Conversation History:
+
+All user interactions (text and voice transcripts) must be saved to a local, persistent database.
+
+Requirement 3.5.2: Semantic Search:
+
+The system must implement a Retrieval-Augmented Generation (RAG) pipeline. It must be able to perform semantic searches on the conversation history to find relevant past interactions.
+
+Requirement 3.5.3: Contextual Recall:
+
+The AI must automatically use the knowledge retrieved from long-term memory to provide more context-aware and personalized responses.
+
+4. User Experience (UX) & Interface
+Requirement 4.1: Single-Command Launch: The application should be launchable from the command line with a single, simple command.
+
+Requirement 4.2: Intuitive UI: The user interface must be beautiful, modern, and intuitive, with clear indicators for AI status (e.g., listening, thinking, speaking).
+
+Requirement 4.3: Seamless Interaction: The user should be able to switch between typing and speaking to the AI without friction.
+
+Requirement 4.4: Instantaneous Feedback: The AI's initial response (at least from the "Talker") should feel instantaneous, with both voice and text appearing promptly.
+
+5. Technical & Performance Benchmarks
+Requirement 5.1: Response Latency: Standard conversational responses from the "Talker" model must be delivered in under 2 seconds.
+
+Requirement 5.2: Voice Reliability: The voice interface (including wake word, STT, and TTS) must have a success rate of 99% under normal operating conditions.
+
+Requirement 5.3: Stability: The application must be rock-solid, with no critical crashes, hangs, or memory leaks during extended use.
+
+7. Development Environment Setup
+Requirement 7.1: Python Virtual Environment: A dedicated Python virtual environment must be created and activated for all development and execution of the Sovereign AI Agent. This ensures dependency isolation and prevents conflicts with system-wide Python packages.
+
+Requirement 7.2: CUDA-Compatible PyTorch: Before installing any other dependencies, the correct CUDA-compatible version of PyTorch must be installed that matches the target hardware (NVIDIA RTX 5070 Ti 16GB or equivalent). This is critical for GPU acceleration of the AI models.
+
+Requirement 7.3: Installation Sequence: The development environment setup must follow this specific sequence:
+1. Create and activate Python virtual environment
+2. Install CUDA-compatible PyTorch (e.g., `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`)
+3. Install remaining dependencies from requirements.txt
+4. Verify GPU acceleration is working properly
+
+Requirement 7.4: Documentation: The installation process must be clearly documented with specific commands and troubleshooting steps for common issues related to CUDA and GPU detection.
