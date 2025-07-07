@@ -1,0 +1,68 @@
+# Task ID: 23
+# Title: Migrate Screen Context to ScreenContextService
+# Status: pending
+# Dependencies: 6, 19, 20
+# Priority: medium
+# Description: Refactor the application to move OCR and screen capture functionality into a dedicated ScreenContextService that implements lazy loading, improving modularity and startup performance.
+# Details:
+1. Create a new ScreenContextService class:
+   - Implement singleton pattern to ensure only one instance exists
+   - Design interface for screen capture and OCR operations
+   - Implement lazy loading mechanism that initializes OCR engine only on first capture
+   - Add configuration options for capture frequency and privacy settings
+   - Migrate existing functionality from ScreenContextManager
+
+2. Refactor screen capture implementation:
+   - Move screen capture code from direct implementation to ScreenContextService
+   - Implement proxy methods that route to the actual implementation
+   - Add caching mechanism to store recent captures and extracted text
+   - Ensure thread safety for concurrent access
+
+3. Optimize OCR processing:
+   - Implement on-demand text extraction that processes only when requested
+   - Add region-specific OCR to allow targeted text extraction
+   - Implement text post-processing to improve quality of extracted content
+   - Add support for different OCR engines based on configuration
+
+4. Implement privacy controls:
+   - Add user-configurable capture exclusion zones
+   - Implement sensitive content detection and masking
+   - Create clear visual indicators when screen capture is active
+   - Add option to temporarily disable/enable the service
+
+5. Service integration:
+   - Register ScreenContextService with ServiceManager
+   - Update existing code to reference the new service instead of direct implementation
+   - Implement proper cleanup and resource management
+   - Add event system for notifying subscribers of context changes
+
+# Test Strategy:
+1. Measure startup performance improvement:
+   - Compare application startup time before and after implementation
+   - Verify that OCR-related components are not loaded until needed
+   - Profile memory usage during startup with and without lazy loading
+   - Measure time to first screen capture with cold vs. warm service
+
+2. Test OCR functionality:
+   - Verify text extraction accuracy matches or exceeds previous implementation
+   - Test with various screen content types (text documents, code, images, mixed content)
+   - Measure processing time for different screen sizes and content complexity
+   - Validate region-specific OCR functionality
+
+3. Test service integration:
+   - Verify proper registration with ServiceManager
+   - Test service lifecycle (initialization, operation, shutdown)
+   - Ensure all components using screen context are updated to use the new service
+   - Verify thread safety with concurrent access patterns
+
+4. Test privacy features:
+   - Verify exclusion zones correctly prevent capture of specified regions
+   - Test sensitive content detection and masking
+   - Validate visual indicators for active capture
+   - Confirm temporary disable/enable functionality works as expected
+
+5. Regression testing:
+   - Ensure all existing functionality continues to work with the new service
+   - Verify no memory leaks during extended operation
+   - Test performance under high load conditions
+   - Validate proper cleanup on application shutdown

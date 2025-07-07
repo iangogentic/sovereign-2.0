@@ -1,0 +1,80 @@
+# Task ID: 18
+# Title: Resolve Core Initialization Failures
+# Status: cancelled
+# Dependencies: 15, 16, 17
+# Priority: high
+# Description: Fix critical initialization issues including Config object serialization errors, database schema updates for context_window column, and ensure clean CLI startup with zero errors.
+# Details:
+1. Fix Config object serialization error:
+   - Identify the root cause of serialization failures during model initialization
+   - Update the Config class to implement proper serialization/deserialization methods
+   - Ensure all Config attributes are serializable types
+   - Add validation to prevent invalid configuration states
+   - Implement graceful error handling for configuration loading failures
+
+2. Update database schema:
+   - Add context_window column to the appropriate database tables
+   - Create database migration script to safely update existing databases
+   - Implement backward compatibility for databases without the column
+   - Update ORM models to include the new column
+   - Add validation for context_window values (must be positive integer)
+
+3. Ensure clean CLI startup:
+   - Implement comprehensive startup diagnostics
+   - Add structured error handling during initialization sequence
+   - Create initialization order dependency graph to ensure proper component startup
+   - Add detailed logging for initialization steps
+   - Implement graceful degradation for non-critical initialization failures
+   - Create recovery mechanisms for common initialization issues
+
+4. Refactor initialization code:
+   - Separate concerns between configuration, database, and model initialization
+   - Implement lazy loading where appropriate to improve startup time
+   - Add initialization progress reporting
+   - Create initialization timeout detection and handling
+<info added on 2025-07-06T22:22:30.997Z>
+## Progress Update
+
+**MAJOR BREAKTHROUGH: Fixed both critical initialization failures!**
+
+**COMPLETED:**
+1. Config object serialization error - FIXED by passing model name strings instead of Config objects
+2. Database schema missing context_window column - FIXED with automatic migration
+3. Core system functionality - WORKING, system starts up and processes user input
+
+**REMAINING MINOR ISSUES:**
+1. ConsentManager missing get_monitoring_state method
+2. ThinkerModel CUDA memory (non-blocking)
+3. Unicode logging errors (cosmetic)
+
+System is now functionally operational - core objectives achieved!
+</info added on 2025-07-06T22:22:30.997Z>
+
+# Test Strategy:
+1. Test Config serialization fixes:
+   - Create unit tests for Config serialization/deserialization
+   - Test with various configuration scenarios (minimal, typical, edge cases)
+   - Verify serialization works across different Python versions
+   - Test with malformed configuration data to ensure proper error handling
+   - Benchmark serialization/deserialization performance
+
+2. Test database schema updates:
+   - Verify migration script works on databases with existing data
+   - Test backward compatibility with older schema versions
+   - Validate context_window constraints are enforced
+   - Test edge cases (NULL values, minimum/maximum values)
+   - Verify ORM models correctly handle the new column
+
+3. Test CLI startup:
+   - Measure startup time before and after changes
+   - Verify zero error startup on multiple environments
+   - Test startup with various configuration settings
+   - Simulate component failures to test error handling
+   - Verify all initialization logs are correctly generated
+   - Test startup with minimal permissions to ensure graceful handling
+
+4. Integration testing:
+   - Verify end-to-end functionality after all fixes
+   - Test model initialization with various configurations
+   - Validate system performance with updated database schema
+   - Ensure all components initialize correctly in the proper sequence

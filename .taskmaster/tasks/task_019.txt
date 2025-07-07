@@ -1,0 +1,78 @@
+# Task ID: 19
+# Title: Establish Core Application Shell & Service Manager
+# Status: pending
+# Dependencies: 1, 4, 8, 10, 16
+# Priority: high
+# Description: Create the main application entry point (main.py), implement the CoreApp class, and develop a placeholder ServiceManager that enables cold launch in under 1 second.
+# Details:
+1. Create main.py as the application entry point:
+   - Implement command-line argument parsing
+   - Configure logging initialization
+   - Handle environment setup and configuration loading
+   - Initialize the CoreApp instance
+   - Add graceful shutdown handling
+
+2. Implement CoreApp class:
+   - Create a modular application core that initializes only essential services on startup
+   - Implement lazy loading pattern for non-critical services
+   - Add application lifecycle management (init, start, stop, pause, resume)
+   - Create event system for inter-service communication
+   - Implement configuration management and persistence
+   - Add performance monitoring for startup sequence
+
+3. Develop ServiceManager class:
+   - Create service registration and discovery mechanism
+   - Implement service dependency resolution
+   - Add service lifecycle management (start, stop, restart)
+   - Create service health monitoring
+   - Implement prioritized initialization for critical services
+   - Add dynamic service loading/unloading capabilities
+   - Create service configuration interface
+
+4. Optimize cold launch performance:
+   - Implement startup profiling to identify bottlenecks
+   - Use asynchronous initialization for non-critical services
+   - Create a startup sequence that prioritizes UI responsiveness
+   - Implement resource usage throttling during startup
+   - Add progress reporting for long-running initialization tasks
+   - Create a minimal viable state for initial user interaction
+
+5. Integrate with existing components:
+   - Connect to ModelOrchestrator (Task 4)
+   - Interface with UI components (Task 10)
+   - Integrate with ToolIntegrationFramework (Task 8)
+   - Ensure compatibility with debugging framework (Task 16)
+
+# Test Strategy:
+1. Measure cold launch performance:
+   - Create automated test to measure time from application launch to interactive UI
+   - Verify cold launch completes in under 1 second on target hardware
+   - Profile memory usage during startup sequence
+   - Test launch performance under different system loads
+
+2. Verify CoreApp functionality:
+   - Test application lifecycle methods (init, start, stop, pause, resume)
+   - Verify configuration loading and persistence
+   - Test event system with multiple subscribers
+   - Validate graceful shutdown with proper resource cleanup
+   - Test error handling during initialization failures
+
+3. Test ServiceManager capabilities:
+   - Verify service registration and discovery mechanism
+   - Test service dependency resolution with complex dependency graphs
+   - Validate service lifecycle management (start, stop, restart)
+   - Test dynamic service loading/unloading
+   - Verify service health monitoring and reporting
+
+4. Integration testing:
+   - Verify correct integration with ModelOrchestrator
+   - Test UI responsiveness during startup
+   - Validate tool framework integration
+   - Test with debugging framework enabled
+   - Verify all critical services are properly initialized
+
+5. Edge case testing:
+   - Test application behavior with missing or corrupted configuration
+   - Verify recovery from service initialization failures
+   - Test performance on minimum specification hardware
+   - Validate behavior when system resources are constrained

@@ -8,7 +8,6 @@ import logging
 from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import Optional, Dict, Any
-import torch
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +39,17 @@ class ModelConfig:
     thinker_temperature: float = 0.3  # Lower temperature for more focused reasoning
     thinker_max_tokens: int = 4096  # Longer responses for complex tasks
     thinker_context_window: int = 8192  # Larger context for complex reasoning
+    
+    # External model settings
+    external_routing_enabled: bool = True
+    external_routing_threshold: float = 0.3  # Minimum confidence for external routing
+    external_model_provider: str = "openrouter"
+    external_model_default: str = "anthropic/claude-3-sonnet"
+    external_model_temperature: float = 0.7
+    external_model_max_tokens: int = 2048
+    external_model_timeout: float = 30.0
+    external_cache_ttl_hours: int = 24
+    external_require_user_consent: bool = True
 
 
 @dataclass
@@ -59,6 +69,7 @@ class ScreenCaptureConfig:
     capture_interval: float = 5.0  # seconds
     ocr_enabled: bool = True
     max_screenshot_history: int = 100
+    tesseract_cmd_path: Optional[str] = None  # Path to tesseract executable
 
 
 @dataclass
@@ -168,6 +179,7 @@ class Config:
     def _detect_hardware(self):
         """Detect and configure hardware capabilities"""
         try:
+            import torch
             if torch.cuda.is_available():
                 gpu_name = torch.cuda.get_device_name(0)
                 gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
@@ -266,5 +278,22 @@ class Config:
         return env_vars
 
 
-# Global configuration instance
-config = Config() 
+# Global configuration instance (lazy-loaded)
+_config = None
+
+def get_config():
+    """Get the global config instance (lazy-loaded)"""
+    global _config
+    if _config is None:
+        _config = Config()
+    return _config
+
+# Create a property-like object for backwards compatibility
+class _ConfigProxy:
+    def __getattr__(self, name):
+        return getattr(get_config(), name)
+    
+    def __setattr__(self, name, value):
+        setattr(get_config(), name, value)
+
+config = _ConfigProxy() 

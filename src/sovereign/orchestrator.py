@@ -13,6 +13,8 @@ from .config import Config
 from .logger import setup_logger, get_performance_logger
 from .talker_model import TalkerModel
 from .thinker_model import ThinkerModel
+from .screen_context_manager import ScreenContextManager, ScreenContextConfig
+from .screen_context_integration import ScreenContextIntegration, ContextAccessRequest, ContextAccessLevel
 import logging
 
 
@@ -84,6 +86,11 @@ class ModelOrchestrator:
         self.talker_model: Optional[TalkerModel] = None
         self.thinker_model: Optional[ThinkerModel] = None
         
+        # Screen context system
+        self.screen_context_manager: Optional[ScreenContextManager] = None
+        self.screen_context_integration: Optional[ScreenContextIntegration] = None
+        self.enable_screen_context = getattr(config, 'enable_screen_context', True)
+        
         # Response cache
         self.response_cache: Dict[str, CacheEntry] = {}
         self.cache_max_size = 1000
@@ -100,7 +107,9 @@ class ModelOrchestrator:
             'avg_response_time': 0.0,
             'complexity_distribution': defaultdict(int),
             'error_count': 0,
-            'uptime_start': datetime.now()
+            'uptime_start': datetime.now(),
+            'screen_context_requests': 0,
+            'screen_context_enabled': 0
         }
         
         # Complexity detection patterns
@@ -159,21 +168,100 @@ class ModelOrchestrator:
     async def initialize(self):
         """Initialize the orchestrator and both models"""
         try:
+            print("DEBUG: Starting ModelOrchestrator initialization...")
             self.logger.info("Initializing ModelOrchestrator...")
             
-            # Initialize Talker model
-            self.talker_model = TalkerModel(self.config)
+            print("DEBUG: Creating TalkerModel instance...")
+            # Initialize Talker model - FIXED: Pass model name string, not entire Config object
+            self.talker_model = TalkerModel(self.config.models.talker_model)
+            print("DEBUG: TalkerModel instance created, about to initialize...")
             await self.talker_model.initialize()
+            print("DEBUG: TalkerModel initialized successfully.")
             
-            # Initialize Thinker model
-            self.thinker_model = ThinkerModel(self.config)
+            print("DEBUG: Creating ThinkerModel instance...")
+            # Initialize Thinker model - FIXED: Pass model name string, not entire Config object
+            self.thinker_model = ThinkerModel(self.config.models.thinker_model)
+            print("DEBUG: ThinkerModel instance created, about to initialize...")
             await self.thinker_model.initialize()
+            print("DEBUG: ThinkerModel initialized successfully.")
             
+            print("DEBUG: Checking if screen context should be enabled...")
+            # Initialize screen context system if enabled
+            if self.enable_screen_context:
+                print("DEBUG: Screen context enabled, initializing...")
+                await self._initialize_screen_context()
+                print("DEBUG: Screen context initialization completed.")
+            else:
+                print("DEBUG: Screen context disabled, skipping initialization.")
+            
+            print("DEBUG: ModelOrchestrator initialization completed successfully.")
             self.logger.info("ModelOrchestrator initialization complete")
             
         except Exception as e:
+            print(f"DEBUG: ModelOrchestrator initialization failed with error: {e}")
             self.logger.error(f"Failed to initialize ModelOrchestrator: {e}")
             raise
+    
+    async def _initialize_screen_context(self):
+        """Initialize screen context management system"""
+        try:
+            print("DEBUG: Starting screen context initialization...")
+            self.logger.info("Initializing screen context system...")
+            
+            print("DEBUG: Creating screen context configuration...")
+            # Create screen context configuration
+            screen_config = ScreenContextConfig(
+                capture_interval=getattr(self.config, 'screen_capture_interval', 4.0),
+                max_stored_captures=getattr(self.config, 'max_screen_captures', 100),
+                privacy_mode=getattr(self.config, 'privacy_mode', False),
+                enable_preprocessing=True,
+                min_text_confidence=30.0
+            )
+            print("DEBUG: Screen context configuration created.")
+            
+            print("DEBUG: Creating ScreenContextManager...")
+            # Initialize screen context manager
+            self.screen_context_manager = ScreenContextManager(screen_config, self.config)
+            print("DEBUG: ScreenContextManager created, about to initialize...")
+            if await self.screen_context_manager.initialize(self.config):
+                print("DEBUG: ScreenContextManager initialized successfully.")
+                self.logger.info("✅ Screen context manager initialized successfully")
+                
+                print("DEBUG: Creating ScreenContextIntegration...")
+                # Initialize integration layer
+                self.screen_context_integration = ScreenContextIntegration(
+                    self.screen_context_manager, self.config
+                )
+                print("DEBUG: ScreenContextIntegration created, about to initialize...")
+                
+                if await self.screen_context_integration.initialize():
+                    print("DEBUG: ScreenContextIntegration initialized successfully.")
+                    self.logger.info("✅ Screen context integration initialized successfully")
+                    self.telemetry['screen_context_enabled'] = 1
+                    
+                    print("DEBUG: Checking if screen capture should be started...")
+                    # Start screen capture if not in privacy mode
+                    if not screen_config.privacy_mode:
+                        print("DEBUG: Privacy mode off, starting screen capture...")
+                        await self.screen_context_manager.start_capture()
+                        print("DEBUG: Screen capture started.")
+                        self.logger.info("🔄 Screen capture started")
+                    else:
+                        print("DEBUG: Privacy mode on, skipping screen capture start.")
+                else:
+                    print("DEBUG: Failed to initialize ScreenContextIntegration.")
+                    self.logger.error("❌ Failed to initialize screen context integration")
+                    self.screen_context_integration = None
+            else:
+                print("DEBUG: Failed to initialize ScreenContextManager.")
+                self.logger.error("❌ Failed to initialize screen context manager")
+                self.screen_context_manager = None
+                
+        except Exception as e:
+            print(f"DEBUG: Screen context initialization failed with error: {e}")
+            self.logger.error(f"Screen context initialization failed: {e}")
+            self.screen_context_manager = None
+            self.screen_context_integration = None
     
     async def process_query(self, user_input: str, context: Optional[QueryContext] = None) -> OrchestrationResult:
         """
@@ -195,6 +283,9 @@ class ModelOrchestrator:
                     previous_queries=[],
                     conversation_history=[]
                 )
+            
+            # Enrich context with screen context if available
+            await self._enrich_context_with_screen_data(context)
             
             # Check cache first
             cache_result = self._check_cache(user_input, context)
@@ -328,6 +419,27 @@ class ModelOrchestrator:
                 recent_query = context.previous_queries[-1].lower()
                 if any(pattern in recent_query for pattern in ['explain', 'analyze', 'compare']):
                     context_score += 0.2
+            
+            # Consider screen context
+            if hasattr(context, 'screen_context') and context.screen_context:
+                screen_ctx = context.screen_context
+                
+                # Queries about visible screen content may be more complex
+                if any(keyword in query_lower for keyword in ['on screen', 'visible', 'current', 'this page', 'what i see']):
+                    if screen_ctx.get('has_text_content', False):
+                        context_score += 0.4  # High boost for screen-aware queries
+                
+                # Large amount of screen text suggests complex analysis
+                text_length = screen_ctx.get('text_length', 0)
+                if text_length > 500:
+                    context_score += 0.2
+                elif text_length > 1000:
+                    context_score += 0.3
+                
+                # Multiple screen elements suggest complexity
+                elements_count = len(screen_ctx.get('elements', []))
+                if elements_count > 5:
+                    context_score += 0.2
         
         confidence_factors.append(('context_analysis', min(context_score, 1.0)))
         
@@ -387,7 +499,7 @@ class ModelOrchestrator:
                 # Hand off to Thinker
                 thinker_response = await self.handle_model_handoff(user_input, context)
                 response = await self.integrate_responses(response, thinker_response)
-                model_choice = ModelChoice.BOTH
+                model_choice = ModelChoice.THINKER
             
             return OrchestrationResult(
                 response=response,
@@ -496,6 +608,63 @@ class ModelOrchestrator:
         
         return "\n".join(context_parts)
     
+    async def _enrich_context_with_screen_data(self, context: QueryContext):
+        """Enrich QueryContext with current screen context data"""
+        if not self.screen_context_integration:
+            return
+        
+        try:
+            self.telemetry['screen_context_requests'] += 1
+            
+            # Create context access request
+            request = ContextAccessRequest(
+                requester="orchestrator",
+                access_level=ContextAccessLevel.ENHANCED,
+                max_age_seconds=300,  # Last 5 minutes
+                include_references=True,
+                privacy_aware=True
+            )
+            
+            # Get current screen context
+            response = await self.screen_context_integration.get_current_context(request)
+            
+            if response.success:
+                # Add screen context to QueryContext
+                context.screen_context = {
+                    "timestamp": response.timestamp,
+                    "captures_count": response.captures_count,
+                    "references_count": response.references_count,
+                    "privacy_filtered": response.privacy_filtered,
+                    "summary": await self.screen_context_integration.get_context_summary(
+                        format_type="text_summary",
+                        max_age_seconds=300
+                    ),
+                    "elements": await self.screen_context_integration.get_screen_element_references(
+                        max_age_seconds=300
+                    )[:10],  # Limit to 10 most recent elements
+                    "access_level": response.access_level.value
+                }
+                
+                # Add screen context indicators for complexity analysis
+                if response.data.get("text_content"):
+                    context.screen_context["has_text_content"] = True
+                    context.screen_context["text_length"] = len(response.data["text_content"])
+                else:
+                    context.screen_context["has_text_content"] = False
+                    context.screen_context["text_length"] = 0
+                
+                self.logger.debug(f"Enriched context with screen data: {response.captures_count} captures, {response.references_count} references")
+            else:
+                self.logger.warning(f"Failed to get screen context: {response.error_message}")
+                context.screen_context = {
+                    "error": response.error_message,
+                    "privacy_filtered": response.privacy_filtered
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Error enriching context with screen data: {e}")
+            context.screen_context = {"error": str(e)}
+    
     async def integrate_responses(self, talker_response: str, thinker_response: str) -> str:
         """Integrate responses from both models"""
         # Simple integration strategy - use Thinker response but acknowledge the handoff
@@ -553,12 +722,16 @@ class ModelOrchestrator:
     
     def _should_cache(self, result: OrchestrationResult, complexity: QueryComplexity) -> bool:
         """Determine if a result should be cached"""
-        # Cache simple queries and successful responses
-        if result.confidence_score > 0.7 and complexity == QueryComplexity.SIMPLE:
+        # Cache simple and moderate queries (basic factual queries should be cached)
+        if complexity in [QueryComplexity.SIMPLE, QueryComplexity.MODERATE]:
             return True
         
         # Cache complex queries that took significant time
         if result.processing_time > 5.0 and result.confidence_score > 0.5:
+            return True
+        
+        # Cache any successful response with reasonable confidence
+        if result.confidence_score > 0.3:
             return True
         
         return False
@@ -619,5 +792,13 @@ class ModelOrchestrator:
             await self.talker_model.close()
         if self.thinker_model:
             await self.thinker_model.close()
+        
+        # Close screen context system
+        if self.screen_context_manager:
+            await self.screen_context_manager.stop_capture()
+            await self.screen_context_manager.cleanup()
+        
+        if self.screen_context_integration:
+            await self.screen_context_integration.cleanup()
         
         self.logger.info("ModelOrchestrator closed") 

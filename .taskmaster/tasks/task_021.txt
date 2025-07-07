@@ -1,0 +1,60 @@
+# Task ID: 21
+# Title: Migrate RAG to an On-Demand MemoryService
+# Status: pending
+# Dependencies: 19, 20
+# Priority: high
+# Description: Refactor the application to move FAISS vector database and MemoryManager into a dedicated MemoryService that initializes on first query, improving startup performance and memory management.
+# Details:
+1. Create a new MemoryService class:
+   - Implement singleton pattern to ensure only one instance exists
+   - Design interface for vector storage and retrieval operations
+   - Implement lazy loading mechanism that initializes FAISS only on first query
+   - Add configuration options for memory persistence and vector dimensions
+
+2. Migrate existing FAISS implementation:
+   - Move vector database initialization from direct instantiation to MemoryService
+   - Refactor index creation and management to be handled by the service
+   - Implement proper cleanup and resource management for FAISS indexes
+   - Add support for multiple vector stores with different configurations
+
+3. Refactor MemoryManager integration:
+   - Update MemoryManager to use MemoryService for storage operations
+   - Implement proxy methods that route to the actual vector store implementation
+   - Ensure thread-safety for concurrent memory operations
+   - Add caching layer to optimize frequent retrieval operations
+
+4. Optimize RAG performance:
+   - Implement batched vector operations to reduce overhead
+   - Add configurable similarity thresholds for retrieval
+   - Create index persistence mechanism to avoid rebuilding on restart
+   - Implement memory usage monitoring and optimization
+
+5. Update dependent components:
+   - Modify any components that directly accessed FAISS to use MemoryService
+   - Update query processing pipeline to work with the new service
+   - Ensure backward compatibility with existing code
+
+# Test Strategy:
+1. Measure startup performance improvement:
+   - Compare application startup time before and after implementation
+   - Verify that memory-intensive components are not loaded until needed
+   - Profile memory usage during startup with and without lazy loading
+   - Measure time to first query with cold vs. warm starts
+
+2. Test vector storage and retrieval functionality:
+   - Create unit tests for all MemoryService public methods
+   - Verify vector embeddings are correctly stored and retrieved
+   - Test with various vector dimensions and index sizes
+   - Benchmark retrieval performance with different query patterns
+
+3. Validate integration with existing components:
+   - Ensure RAG functionality works correctly with the new service
+   - Test concurrent query scenarios to verify thread safety
+   - Verify all dependent components can access memory services properly
+   - Test error handling and recovery scenarios
+
+4. Performance testing:
+   - Measure memory footprint before and after implementation
+   - Test with large vector databases to ensure scalability
+   - Verify query latency remains within acceptable thresholds
+   - Test memory cleanup and resource management

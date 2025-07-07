@@ -182,6 +182,8 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 addopts = [
     "--strict-markers",
     "--strict-config",
@@ -192,6 +194,8 @@ markers = [
     "gpu: marks tests that require GPU",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "not_heavy: marks tests that don't use heavy imports (for fast startup verification)",
+    "heavy: marks tests that use heavy imports and full integration",
 ]
 
 [tool.coverage.run]

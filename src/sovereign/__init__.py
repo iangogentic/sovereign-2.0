@@ -8,11 +8,13 @@ screen context awareness, and external tool integration.
 
 from .config import Config, config
 from .logger import setup_logger, get_performance_logger, PerformanceTimer
-from .hardware import check_system_requirements, hardware_detector, get_device
+# COMMENTED OUT TO FIX STARTUP LAG: hardware imports torch at module level
+# from .hardware import check_system_requirements, hardware_detector, get_device
 from .ollama_client import OllamaClient, OllamaError
-from .talker_model import TalkerModel
-from .thinker_model import ThinkerModel, TaskType
-from .orchestrator import ModelOrchestrator, QueryContext, OrchestrationResult, QueryComplexity, ModelChoice
+# COMMENTED OUT TO FIX STARTUP LAG: these models import torch at module level
+# from .talker_model import TalkerModel
+# from .thinker_model import ThinkerModel, TaskType
+# from .orchestrator import ModelOrchestrator, QueryContext, OrchestrationResult, QueryComplexity, ModelChoice
 
 # Optional voice interface imports (requires audio dependencies)
 try:
@@ -50,19 +52,21 @@ __all__ = [
     "setup_logger",
     "get_performance_logger",
     "PerformanceTimer",
-    "check_system_requirements",
-    "hardware_detector",
-    "get_device",
+    # Hardware functions commented out to fix startup lag
+    # "check_system_requirements",
+    # "hardware_detector", 
+    # "get_device",
     "OllamaClient",
     "OllamaError",
-    "TalkerModel",
-    "ThinkerModel",
-    "TaskType",
-    "ModelOrchestrator",
-    "QueryContext",
-    "OrchestrationResult",
-    "QueryComplexity",
-    "ModelChoice",
+    # Model classes commented out to fix startup lag
+    # "TalkerModel",
+    # "ThinkerModel", 
+    # "TaskType",
+    # "ModelOrchestrator",
+    # "QueryContext",
+    # "OrchestrationResult",
+    # "QueryComplexity",
+    # "ModelChoice",
     "VOICE_INTERFACE_AVAILABLE",
     "GUI_AVAILABLE",
     "main"

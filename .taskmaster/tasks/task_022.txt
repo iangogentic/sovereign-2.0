@@ -1,0 +1,69 @@
+# Task ID: 22
+# Title: Migrate Tools to an On-Demand ToolService
+# Status: pending
+# Dependencies: 19, 20
+# Priority: medium
+# Description: Encapsulate tool discovery and execution in a dedicated ToolService that implements lazy loading, initializing tools only when requested to improve startup performance and modularize the application architecture.
+# Details:
+1. Create a new ToolService class:
+   - Implement singleton pattern to ensure only one instance exists
+   - Design a tool registry to track available tools and their metadata
+   - Implement lazy loading mechanism that initializes tools only on first request
+   - Add configuration options for tool loading priorities and dependencies
+   - Create interfaces for tool discovery, registration, and execution
+
+2. Implement tool discovery mechanism:
+   - Create a plugin-like architecture for tool registration
+   - Support automatic discovery of tools in designated directories
+   - Implement tool metadata extraction for capabilities and requirements
+   - Add versioning support for tools to manage compatibility
+
+3. Develop tool execution framework:
+   - Create standardized interfaces for tool invocation
+   - Implement parameter validation and type checking
+   - Add error handling and graceful degradation when tools fail
+   - Support both synchronous and asynchronous tool execution
+   - Implement tool execution logging and performance metrics
+
+4. Refactor existing tool implementations:
+   - Move direct tool instantiation code to the ToolService
+   - Update tool imports to use the service's lazy loading mechanism
+   - Implement proxy methods that route to the actual tool implementations
+   - Ensure backward compatibility with existing tool usage patterns
+
+5. Add tool lifecycle management:
+   - Implement proper initialization and cleanup for tools
+   - Add resource management to prevent memory leaks
+   - Support tool reloading without application restart
+   - Implement tool dependency resolution for tools that require other tools
+
+# Test Strategy:
+1. Measure startup performance improvement:
+   - Compare application startup time before and after implementation
+   - Verify that tool-related components are not loaded until needed
+   - Profile memory usage during startup with and without lazy loading
+   - Measure time to first tool execution with cold vs. warm starts
+
+2. Test tool discovery mechanism:
+   - Verify all existing tools are properly discovered and registered
+   - Test discovery of new tools added at runtime
+   - Validate correct metadata extraction from tool implementations
+   - Test edge cases like duplicate tools or incompatible versions
+
+3. Validate tool execution framework:
+   - Create unit tests for each tool execution path
+   - Test parameter validation with valid and invalid inputs
+   - Verify error handling correctly captures and reports failures
+   - Test asynchronous tool execution with various completion times
+   - Measure performance overhead of the service layer
+
+4. Integration testing:
+   - Verify all application features that use tools continue to function
+   - Test interactions between multiple tools in sequence
+   - Validate that tool dependencies are correctly resolved
+   - Test the system under high load with multiple concurrent tool requests
+
+5. Regression testing:
+   - Ensure existing functionality remains intact
+   - Verify no performance degradation for critical tool operations
+   - Test backward compatibility with code that might bypass the service

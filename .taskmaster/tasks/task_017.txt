@@ -1,0 +1,102 @@
+# Task ID: 17
+# Title: Diagnose and Fix CUDA GPU Fallback Issue
+# Status: done
+# Dependencies: 3, 2, 15
+# Priority: high
+# Description: Identify and resolve the critical hardware issue causing the application to fall back to CPU instead of utilizing CUDA GPU acceleration, which severely impacts AI model performance.
+# Details:
+1. Implement comprehensive GPU diagnostics system:
+   - Create a GPUDiagnosticTool class with methods:
+     - check_cuda_availability()
+     - verify_gpu_drivers()
+     - test_pytorch_cuda_compatibility()
+     - measure_gpu_performance()
+     - log_system_configuration()
+   - Add detailed error reporting with specific CUDA error codes and descriptions
+
+2. Identify potential root causes:
+   - Check CUDA toolkit version compatibility with PyTorch installation
+   - Verify GPU driver versions against requirements
+   - Inspect model loading code for missing CUDA device assignment
+   - Check for memory leaks causing GPU OOM errors
+   - Analyze CUDA initialization sequence in ThinkerModel and TalkerModel classes
+   - Verify correct CUDA device selection when multiple GPUs are present
+
+3. Implement fixes for common CUDA issues:
+   - Add explicit device assignment in model loading: `model.to('cuda')`
+   - Implement proper CUDA memory management with `torch.cuda.empty_cache()`
+   - Add graceful fallback with warning when GPU is unavailable
+   - Fix any incorrect tensor device assignments
+   - Ensure proper CUDA stream management for concurrent operations
+
+4. Add GPU monitoring and automatic recovery:
+   - Implement continuous GPU health monitoring
+   - Add automatic model reloading on CUDA errors
+   - Create user notification system for GPU issues
+   - Implement configurable fallback thresholds
+
+5. Update model initialization code:
+   - Modify ThinkerModel and TalkerModel to explicitly check and use CUDA
+   - Add detailed logging during model initialization
+   - Implement proper error handling for CUDA initialization failures
+
+6. Optimize CUDA memory usage:
+   - Implement gradient checkpointing for large models
+   - Add configurable precision settings (FP16/BF16)
+   - Implement efficient tensor management to reduce fragmentation
+<info added on 2025-07-06T02:41:00.782Z>
+7. Root cause identified and fix implementation:
+   - CRITICAL ISSUE: CPU-only PyTorch installation (2.7.1+cpu) despite functional GPU hardware
+   - Hardware verification results:
+     - RTX 5070 Ti (16GB VRAM) detected and operational
+     - NVIDIA drivers 576.57 installed correctly
+     - CUDA 12.9 toolkit properly installed
+     - nvidia-smi functioning as expected
+   - Implementation solution:
+     - Reinstall PyTorch with CUDA support using:
+       `pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
+     - Verify installation with torch.cuda.is_available() check
+     - Update requirements.txt to specify CUDA-enabled PyTorch version
+
+8. Enhanced diagnostic capabilities:
+   - Added diagnose_gpu_environment() function to hardware.py
+   - Implemented --diagnose-gpu command-line argument in run_sovereign.py
+   - Created 8-step comprehensive diagnostic process covering:
+     - PyTorch version verification
+     - CUDA availability checking
+     - Driver compatibility testing
+     - Environment variable validation
+     - Specific recommendation generation based on detected issues
+</info added on 2025-07-06T02:41:00.782Z>
+
+# Test Strategy:
+1. Verify CUDA detection and initialization:
+   - Run diagnostic tool on systems with known working CUDA setup
+   - Test on systems with different GPU configurations
+   - Verify correct detection of CUDA capabilities
+
+2. Measure performance before and after fixes:
+   - Benchmark inference speed on standard prompts
+   - Compare memory usage patterns
+   - Measure model loading times
+   - Quantify performance difference between CPU and GPU operation
+
+3. Test error handling and recovery:
+   - Simulate GPU errors by intentionally corrupting CUDA state
+   - Verify application can recover from CUDA initialization failures
+   - Test graceful degradation to CPU when necessary
+
+4. Validate fixes across different environments:
+   - Test on multiple NVIDIA GPU generations
+   - Verify compatibility with different CUDA toolkit versions
+   - Test with various PyTorch versions
+
+5. Regression testing:
+   - Ensure all models (Talker and Thinker) still function correctly
+   - Verify no new memory leaks are introduced
+   - Confirm all existing functionality works with GPU acceleration
+
+6. Long-running stability test:
+   - Run continuous inference operations for 24+ hours
+   - Monitor for memory leaks or performance degradation
+   - Verify consistent GPU utilization over time

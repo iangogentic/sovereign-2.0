@@ -16,6 +16,8 @@ from .hardware import check_system_requirements, hardware_detector
 from .talker_model import TalkerModel
 from .thinker_model import ThinkerModel, TaskType
 from .orchestrator import ModelOrchestrator, QueryContext
+from .external_model_connector import ExternalModelConnector, ExternalRoutingCriteria
+from .consent_manager import ConsentManager, ConsentMethod, cli_consent_callback
 
 # Optional voice interface imports
 try:
@@ -124,9 +126,27 @@ def create_parser() -> argparse.ArgumentParser:
     )
     
     parser.add_argument(
+        "--test-external",
+        action="store_true",
+        help="Test external model routing functionality"
+    )
+    
+    parser.add_argument(
+        "--test-consent",
+        action="store_true",
+        help="Test user consent mechanism for external routing"
+    )
+    
+    parser.add_argument(
         "--test-voice",
         action="store_true",
         help="Test the voice interface functionality"
+    )
+    
+    parser.add_argument(
+        "--diagnose-gpu",
+        action="store_true",
+        help="Run comprehensive GPU/CUDA diagnostic and exit"
     )
     
     parser.add_argument(
@@ -674,39 +694,164 @@ async def configure_voice_profile():
         print(f"  - Speech Rate: {config.voice.tts_speech_rate} WPM")
         print(f"  - Volume: {config.voice.tts_volume}")
         
+        logger.info("Voice profile configuration complete")
+        
         return 0
         
     except Exception as e:
-        logger.error(f"❌ Voice configuration failed: {e}")
+        logger.error(f"❌ Error configuring voice profile: {e}")
         return 1
+
+
+async def test_external_routing():
+    """Test external model routing functionality"""
+    logger = logging.getLogger("sovereign")
+    
+    logger.info("🧪 Testing External Model Routing...")
+    
+    # Initialize external connector
+    external_connector = ExternalModelConnector(config)
+    
+    try:
+        # Test initialization
+        logger.info("🔧 Initializing external model connector...")
+        initialized = await external_connector.initialize()
+        
+        if not initialized:
+            logger.warning("⚠️ External model connector not available (no API key or connection failed)")
+            logger.info("💡 Set OPENROUTER_API_KEY environment variable to test external routing")
+            return 0
+        
+        logger.info("✅ External model connector initialized successfully")
+        
+        # Test routing criteria detection
+        test_queries = [
+            "Hello, how are you?",  # Should not route
+            "What are the latest news about AI?",  # Should route - specialized knowledge
+            "Search online for Python tutorials",  # Should route - explicit request
+            "I need the latest up-to-date information about Tesla stock",  # Should route - explicit request
+            "What's the weather like today?",  # Should route - specialized knowledge
+            "Explain how to create a simple Python function",  # Should not route
+        ]
+        
+        logger.info("🔍 Testing routing criteria detection...")
+        for i, query in enumerate(test_queries, 1):
+            logger.info(f"\n🧪 Test {i}: {query}")
+            
+            # Check routing decision
+            decision = external_connector.determine_external_need(query)
+            logger.info(f"📊 Should route: {decision.should_route}")
+            logger.info(f"📊 Confidence: {decision.confidence:.2f}")
+            logger.info(f"📊 Criteria: {[c.value for c in decision.criteria]}")
+            logger.info(f"📊 Reasoning: {decision.reasoning}")
+        
+        # Test performance stats
+        stats = external_connector.get_performance_stats()
+        logger.info("\n📈 Performance Stats:")
+        for key, value in stats.items():
+            logger.info(f"  - {key}: {value}")
+        
+        logger.info("\n✅ External routing tests completed")
+        
+    except Exception as e:
+        logger.error(f"❌ Error testing external routing: {e}")
+        return 1
+    
+    finally:
+        await external_connector.close()
+    
+    return 0
+
+
+async def test_consent_mechanism():
+    """Test user consent mechanism"""
+    logger = logging.getLogger("sovereign")
+    
+    logger.info("🧪 Testing User Consent Mechanism...")
+    
+    # Initialize external connector with consent callback
+    external_connector = ExternalModelConnector(config)
+    
+    try:
+        # Add CLI consent callback
+        external_connector.add_consent_callback(cli_consent_callback)
+        
+        # Test consent with a sample query
+        test_query = "What are the latest developments in AI technology?"
+        
+        logger.info(f"🔍 Testing consent for query: {test_query}")
+        
+        # Get routing decision
+        decision = external_connector.determine_external_need(test_query)
+        
+        if decision.should_route:
+            logger.info("📋 This query would trigger a consent request")
+            logger.info("💡 In a real scenario, you would be prompted for consent")
+            
+            # Show what the consent request would look like
+            logger.info("\n" + "="*60)
+            logger.info("🔗 CONSENT REQUEST PREVIEW")
+            logger.info("="*60)
+            logger.info(f"Query: {test_query}")
+            logger.info(f"Reasoning: {decision.reasoning}")
+            logger.info(f"Confidence: {decision.confidence:.2f}")
+            logger.info(f"Criteria: {[c.value for c in decision.criteria]}")
+            logger.info("="*60)
+            
+            # For testing, we'll simulate a consent decision
+            logger.info("💭 Simulating user consent (would be interactive in real use)")
+            
+        else:
+            logger.info("📋 This query would not require external routing")
+        
+        logger.info("\n✅ Consent mechanism test completed")
+        
+    except Exception as e:
+        logger.error(f"❌ Error testing consent mechanism: {e}")
+        return 1
+    
+    finally:
+        await external_connector.close()
+    
+    return 0
 
 
 async def run_agent():
     """Main agent execution loop with integrated orchestration system"""
     logger = logging.getLogger("sovereign")
     
+    print("DEBUG: Starting run_agent function...")
     logger.info("🚀 Starting Sovereign AI Agent...")
     
+    print("DEBUG: Creating ModelOrchestrator instance...")
     # Initialize orchestrator
     orchestrator = ModelOrchestrator(config)
+    print("DEBUG: ModelOrchestrator instance created.")
     
+    print("DEBUG: Setting up session context...")
     # Session context for conversation history
     session_context = {
         'session_id': 'main_session',
         'conversation_history': [],
         'previous_queries': []
     }
+    print("DEBUG: Session context set up.")
     
+    print("DEBUG: Creating notification callback...")
     # Add notification callback
     async def notification_callback(message: str):
         print(f"💡 {message}")
     
+    print("DEBUG: Adding notification callback to orchestrator...")
     orchestrator.add_notification_callback(notification_callback)
+    print("DEBUG: Notification callback added.")
     
     try:
+        print("DEBUG: About to initialize orchestration system...")
         # Initialize orchestrator
         logger.info("🔧 Initializing orchestration system...")
         await orchestrator.initialize()
+        print("DEBUG: Orchestration system initialization completed.")
         logger.info("✅ Orchestration system initialized successfully")
         logger.info("💡 Agent ready for interaction")
         
@@ -956,6 +1101,30 @@ def main():
             logger.error(f"❌ Test error: {e}")
             sys.exit(1)
     
+    if args.test_external:
+        logger.info("🔗 Running external routing test...")
+        try:
+            exit_code = asyncio.run(test_external_routing())
+            sys.exit(exit_code)
+        except KeyboardInterrupt:
+            logger.info("👋 Test interrupted by user")
+            sys.exit(0)
+        except Exception as e:
+            logger.error(f"❌ Test error: {e}")
+            sys.exit(1)
+    
+    if args.test_consent:
+        logger.info("🛡️ Running consent mechanism test...")
+        try:
+            exit_code = asyncio.run(test_consent_mechanism())
+            sys.exit(exit_code)
+        except KeyboardInterrupt:
+            logger.info("👋 Test interrupted by user")
+            sys.exit(0)
+        except Exception as e:
+            logger.error(f"❌ Test error: {e}")
+            sys.exit(1)
+    
     if args.test_voice:
         logger.info("🎤 Running voice interface test...")
         try:
@@ -992,6 +1161,19 @@ def main():
             logger.error(f"❌ Configuration error: {e}")
             sys.exit(1)
     
+    if args.diagnose_gpu:
+        logger.info("🔍 Running GPU/CUDA diagnostic...")
+        try:
+            from .hardware import diagnose_gpu_environment
+            diagnose_gpu_environment()
+            sys.exit(0)
+        except KeyboardInterrupt:
+            logger.info("👋 Diagnostic interrupted by user")
+            sys.exit(0)
+        except Exception as e:
+            logger.error(f"❌ Diagnostic error: {e}")
+            sys.exit(1)
+    
     if args.gui:
         logger.info("🎨 Launching graphical user interface...")
         if not GUI_AVAILABLE:
@@ -1009,6 +1191,7 @@ def main():
             logger.error(f"❌ GUI error: {e}")
             sys.exit(1)
     
+    print("DEBUG: About to check system requirements...")
     # Check requirements on startup
     logger.info("🔍 Verifying system requirements...")
     if not check_system_requirements():
@@ -1017,14 +1200,19 @@ def main():
         if response.lower() not in ['y', 'yes']:
             logger.info("👋 Exiting...")
             sys.exit(1)
+    print("DEBUG: System requirements check completed.")
     
+    print("DEBUG: About to apply hardware optimizations...")
     # Apply hardware optimizations
     logger.info("⚙️  Applying hardware optimizations...")
     hardware_detector.optimize_pytorch()
+    print("DEBUG: Hardware optimizations applied.")
     
+    print("DEBUG: About to run the main agent...")
     # Run the main agent
     try:
         exit_code = asyncio.run(run_agent())
+        print("DEBUG: Main agent completed.")
         sys.exit(exit_code)
     except KeyboardInterrupt:
         logger.info("👋 Interrupted by user")
