@@ -136,3 +136,7 @@ screenshots/
 temp/
 tmp/
 .temp/
+
+# Task files
+# tasks.json
+# tasks/ 
