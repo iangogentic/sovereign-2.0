@@ -5,6 +5,7 @@ Ultra-lightweight core application that orchestrates services via ServiceManager
 Designed for sub-second cold starts with lazy loading of all heavy components.
 """
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -42,10 +43,10 @@ class CoreApp:
     
     def run(self):
         """
-        Run the application
+        Run the application with interactive loop
         
-        For now, this is a minimal implementation that demonstrates
-        the service architecture without loading heavy components.
+        Presents an interactive prompt for user input and processes queries
+        through the ModelService with lazy loading.
         """
         if self._running:
             logging.warning("Application is already running")
@@ -60,16 +61,105 @@ class CoreApp:
             
             print("📋 Service Manager initialized")
             print("⚡ All services ready for on-demand loading")
-            print("🎯 Ready to receive commands")
+            print("🎯 Sovereign AI Agent ready!")
+            print("💡 Type 'exit' to quit\n")
             
-            # For now, we just print status and exit
-            # In future tasks, this will start the full application loop
+            # Start the interactive loop
+            asyncio.run(self._interactive_loop())
             
+        except KeyboardInterrupt:
+            print("\n👋 Received interrupt signal, shutting down...")
+            logging.info("Application interrupted by user")
         except Exception as e:
             logging.error(f"Failed to start application: {e}")
             raise
         finally:
             self._running = False
+            print("✅ Sovereign AI Agent stopped")
+    
+    async def _interactive_loop(self):
+        """
+        Main interactive loop for processing user queries
+        
+        Handles user input, integrates with ModelService, and manages
+        the conversation flow. Also processes slash commands for feature access.
+        """
+        while True:
+            try:
+                # Get user input
+                user_input = input("🤖 Sovereign > ").strip()
+                
+                # Handle exit command
+                if user_input.lower() in ['exit', 'quit', 'q']:
+                    print("👋 Goodbye!")
+                    break
+                
+                # Skip empty input
+                if not user_input:
+                    continue
+                
+                # Handle slash commands for feature access
+                if user_input.startswith('/'):
+                    await self._handle_slash_command(user_input)
+                    continue
+                
+                # Process query through ModelService
+                print("🔄 Processing...")
+                
+                # Get ModelService from ServiceManager (lazy loading will occur here)
+                model_service = self._service_manager.model()
+                
+                if model_service is None:
+                    print("❌ Error: Unable to load ModelService")
+                    continue
+                
+                # Query the AI model
+                response = await model_service.query(user_input)
+                
+                # Display the response
+                print(f"\n🤖 {response}\n")
+                
+            except KeyboardInterrupt:
+                print("\n👋 Received interrupt signal, shutting down...")
+                break
+            except EOFError:
+                print("\n👋 End of input, shutting down...")
+                break
+            except Exception as e:
+                logging.error(f"Error in interactive loop: {e}")
+                print(f"❌ Error: {e}")
+                print("Please try again or type 'exit' to quit.\n")
+    
+    async def _handle_slash_command(self, command: str):
+        """
+        Handle slash commands for feature access
+        
+        Args:
+            command: The full command string starting with '/'
+        """
+        # Help command
+        if command == '/help':
+            print("📚 Help system: /memory, /tool, /screen")
+            return
+        
+        # Memory commands
+        if command.startswith('/memory'):
+            print(f"💾 Memory command received: {command}")
+            return
+        
+        # Tool commands  
+        if command.startswith('/tool'):
+            print(f"🔧 Tool command received: {command}")
+            return
+        
+        # Screen commands
+        if command.startswith('/screen'):
+            print(f"🖥️ Screen command received: {command}")
+            return
+        
+        # Unknown command
+        print(f"❓ Unknown command: {command}")
+        print("💡 Type '/help' for available commands")
     
     async def stop(self):
         """Stop the application and cleanup resources"""

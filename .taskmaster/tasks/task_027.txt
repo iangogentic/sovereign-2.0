@@ -1,0 +1,106 @@
+# Task ID: 27
+# Title: Design and Implement Feature Access Layer
+# Status: pending
+# Dependencies: 26, 21, 22, 23, 24, 25
+# Priority: high
+# Description: Create a slash command system in CoreApp interactive loop to provide clear access paths to advanced features (RAG/memory, tools, screen context) identified as missing during UAT testing.
+# Details:
+1. Design the slash command architecture:
+   - Create a SlashCommandManager class to handle registration and execution of commands
+   - Define a standard interface for slash commands with methods:
+     ```python
+     class SlashCommand:
+         def get_name(self) -> str: ...
+         def get_description(self) -> str: ...
+         def get_usage(self) -> str: ...
+         def execute(self, args: str, context: QueryContext) -> str: ...
+     ```
+   - Implement command discovery and registration mechanism
+
+2. Implement core slash commands:
+   - `/help` - Display available commands and their descriptions
+   - `/memory` - Access and manage RAG system (search, clear, export)
+   - `/tools` - List available tools and execute them directly
+   - `/screen` - Toggle screen context capture and display current context
+   - `/model` - Switch between Talker/Thinker models or external models
+   - `/config` - View and modify application configuration
+   - `/debug` - Toggle debug mode and access diagnostic information
+
+3. Integrate with CoreApp interactive loop:
+   - Modify the input processing in CoreApp.run() to detect and route slash commands
+   - Add code to CoreApp to initialize the SlashCommandManager
+   - Implement slash command parsing logic:
+     ```python
+     def process_input(self, user_input: str):
+         if user_input.startswith('/'):
+             command_parts = user_input[1:].split(' ', 1)
+             command_name = command_parts[0]
+             args = command_parts[1] if len(command_parts) > 1 else ""
+             return self.slash_command_manager.execute_command(command_name, args, self.context)
+         else:
+             # Process as normal query
+             return self.model_service.process_query(user_input, self.context)
+     ```
+
+4. Connect slash commands to services:
+   - Link `/memory` commands to MemoryService
+   - Link `/tools` commands to ToolService
+   - Link `/screen` commands to ScreenContextService
+   - Link `/model` commands to ModelService
+
+5. Implement help system and documentation:
+   - Create detailed help text for each command
+   - Implement contextual help that shows relevant commands
+   - Add examples for each command in the help documentation
+
+6. Add command history and tab completion:
+   - Implement command history tracking
+   - Add tab completion for command names and arguments
+   - Create context-aware suggestions based on partial commands
+
+7. Implement error handling and feedback:
+   - Create clear error messages for invalid commands
+   - Add confirmation for destructive operations
+   - Implement verbose mode for detailed command output
+
+# Test Strategy:
+1. Test slash command parsing and routing:
+   - Verify that inputs starting with '/' are correctly identified as commands
+   - Test command parsing with various argument formats
+   - Verify that non-command inputs are processed normally
+   - Test error handling for malformed commands
+
+2. Test each core slash command:
+   - Verify `/help` displays all available commands
+   - Test `/memory` operations (search, clear, export)
+   - Verify `/tools` correctly lists and executes available tools
+   - Test `/screen` toggle functionality
+   - Verify `/model` switching between different models
+   - Test `/config` view and modification capabilities
+   - Verify `/debug` toggle and information display
+
+3. Test integration with services:
+   - Verify commands correctly interact with MemoryService
+   - Test tool execution through ToolService
+   - Verify screen context commands work with ScreenContextService
+   - Test model switching through ModelService
+
+4. Test help system:
+   - Verify help text is displayed for each command
+   - Test contextual help functionality
+   - Verify examples are clear and accurate
+
+5. Test command history and completion:
+   - Verify command history is correctly tracked
+   - Test tab completion for command names
+   - Verify argument completion works as expected
+
+6. Perform user acceptance testing:
+   - Have test users attempt to access features using slash commands
+   - Collect feedback on command discoverability and usability
+   - Verify that slash commands provide clear access to previously hard-to-find features
+
+7. Test error handling:
+   - Verify appropriate error messages for invalid commands
+   - Test confirmation prompts for destructive operations
+   - Verify verbose mode provides useful additional information

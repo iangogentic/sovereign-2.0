@@ -1,6 +1,6 @@
 # Task ID: 24
 # Title: Migrate Voice I/O to VoiceService
-# Status: pending
+# Status: done
 # Dependencies: 19, 20
 # Priority: medium
 # Description: Refactor the application to isolate microphone and speaker handling into a dedicated VoiceService that implements lazy loading, improving modularity and startup performance.

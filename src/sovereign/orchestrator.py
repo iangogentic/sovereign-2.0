@@ -639,9 +639,9 @@ class ModelOrchestrator:
                         format_type="text_summary",
                         max_age_seconds=300
                     ),
-                    "elements": await self.screen_context_integration.get_screen_element_references(
+                    "elements": (await self.screen_context_integration.get_screen_element_references(
                         max_age_seconds=300
-                    )[:10],  # Limit to 10 most recent elements
+                    ))[:10],  # Limit to 10 most recent elements
                     "access_level": response.access_level.value
                 }
                 

@@ -1,6 +1,6 @@
 # Task ID: 23
 # Title: Migrate Screen Context to ScreenContextService
-# Status: pending
+# Status: done
 # Dependencies: 6, 19, 20
 # Priority: medium
 # Description: Refactor the application to move OCR and screen capture functionality into a dedicated ScreenContextService that implements lazy loading, improving modularity and startup performance.

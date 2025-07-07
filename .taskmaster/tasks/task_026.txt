@@ -1,0 +1,98 @@
+# Task ID: 26
+# Title: Implement Interactive Loop and Service Integration in CoreApp
+# Status: done
+# Dependencies: 19, 20, 25
+# Priority: high
+# Description: Modify CoreApp.run() to create a main application loop that prompts users for input, integrates with ModelService through ServiceManager for query processing, and provides clean exit functionality.
+# Details:
+1. Update the CoreApp class to implement a robust main application loop:
+   - Modify the run() method to create an event-driven loop that handles user input
+   - Implement graceful shutdown with proper resource cleanup
+   - Add signal handlers for SIGINT and SIGTERM to handle Ctrl+C and system termination
+
+2. Integrate with ServiceManager for accessing services:
+   - Add code to retrieve ModelService instance via ServiceManager
+   - Implement query processing flow:
+     ```python
+     def process_user_input(self, user_input):
+         # Get service instances through ServiceManager
+         model_service = self.service_manager.get_service('ModelService')
+         memory_service = self.service_manager.get_service('MemoryService')
+         
+         # Create query context
+         context = QueryContext(user_input=user_input)
+         
+         # Add relevant memory context if available
+         if memory_service.is_initialized():
+             context.memory_context = memory_service.retrieve_relevant_context(user_input)
+         
+         # Process query through model service
+         response = model_service.process_query(context)
+         
+         # Store interaction in memory if available
+         if memory_service.is_initialized():
+             memory_service.store_interaction(user_input, response, {})
+             
+         return response
+     ```
+
+3. Implement user input handling:
+   - Create a command parser for special commands (e.g., /exit, /help, /settings)
+   - Add input validation and preprocessing
+   - Implement input history tracking
+
+4. Add application state management:
+   - Create an AppState class to track application status
+   - Implement state transitions (initializing, ready, processing, exiting)
+   - Add state change event notifications
+
+5. Implement console-based UI for testing:
+   - Create a simple text-based interface for development and testing
+   - Add colored output for different message types
+   - Implement progress indicators for long-running operations
+
+6. Add configuration options:
+   - Make loop behavior configurable (polling interval, timeout settings)
+   - Add options for debug mode with verbose logging
+   - Create configuration for automatic shutdown after period of inactivity
+
+7. Implement performance monitoring:
+   - Add timing metrics for query processing
+   - Track service initialization times
+   - Log performance statistics periodically
+
+# Test Strategy:
+1. Test basic application loop functionality:
+   - Verify the application starts and enters the main loop
+   - Test that user input is correctly captured and processed
+   - Confirm the application exits cleanly when requested
+
+2. Test service integration:
+   - Verify ModelService is correctly accessed through ServiceManager
+   - Test that queries are properly routed to the appropriate service
+   - Validate that service lazy-loading works as expected when processing queries
+
+3. Test error handling and resilience:
+   - Simulate service failures and verify appropriate error handling
+   - Test recovery from transient errors
+   - Verify application remains stable after service errors
+
+4. Test command processing:
+   - Verify special commands are correctly parsed and executed
+   - Test help command displays appropriate information
+   - Confirm exit command properly terminates the application
+
+5. Test performance:
+   - Measure response time from input to output
+   - Verify memory usage remains stable during extended operation
+   - Test CPU utilization during idle and active states
+
+6. Test state management:
+   - Verify application correctly transitions between states
+   - Test that state change events are properly triggered
+   - Confirm application state is correctly reported
+
+7. Test signal handling:
+   - Verify application responds correctly to SIGINT (Ctrl+C)
+   - Test application cleanup on SIGTERM
+   - Confirm resources are properly released on shutdown

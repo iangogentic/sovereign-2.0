@@ -1,6 +1,6 @@
 # Task ID: 21
 # Title: Migrate RAG to an On-Demand MemoryService
-# Status: pending
+# Status: done
 # Dependencies: 19, 20
 # Priority: high
 # Description: Refactor the application to move FAISS vector database and MemoryManager into a dedicated MemoryService that initializes on first query, improving startup performance and memory management.

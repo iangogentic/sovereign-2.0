@@ -373,7 +373,7 @@ Environment: Windows with isolated testing configuration
 Next Task Ready: All dependencies for Subtask 12.5 "Conduct User Acceptance Testing (UAT)" are now satisfied.
 </info added on 2025-07-06T20:13:34.195Z>
 
-## 5. Conduct User Acceptance Testing (UAT) [pending]
+## 5. Conduct User Acceptance Testing (UAT) [in-progress]
 ### Dependencies: 12.4
 ### Description: Develop and execute user acceptance test scenarios with stakeholders to confirm the system meets business and user requirements.
 ### Details:

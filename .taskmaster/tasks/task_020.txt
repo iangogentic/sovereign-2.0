@@ -1,6 +1,6 @@
 # Task ID: 20
 # Title: Migrate Models to a Lazy-Loaded ModelService
-# Status: pending
+# Status: done
 # Dependencies: 5, 16, 19
 # Priority: high
 # Description: Refactor the application to wrap Talker/Thinker models in a ModelService that implements lazy loading, initializing models only on first use to improve startup performance.
