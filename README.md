@@ -87,6 +87,75 @@ Launch the Sovereign AI Agent with a single command:
 sovereign
 ```
 
+## 🧑‍💻 Development Setup
+
+For developers who want to contribute to or modify the Sovereign AI Agent, we provide automated environment setup tools for a consistent development experience.
+
+### Automated Setup (Recommended)
+
+The fastest way to set up your development environment:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd Soverign\ 2.0
+
+# Run the automated setup script (Windows)
+setup_env.bat
+```
+
+This script will:
+- Create a `.venv` virtual environment
+- Install the correct PyTorch version with CUDA 12.1 support
+- Install all project dependencies
+- Verify the installation
+- Create a configuration template
+
+### Manual Setup
+
+If you prefer manual setup or need to troubleshoot:
+
+```bash
+# Create virtual environment
+python -m venv .venv
+
+# Activate environment (Windows)
+.venv\Scripts\activate
+
+# Install PyTorch with CUDA 12.1 support (IMPORTANT: Install first)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Install remaining dependencies
+pip install -r requirements.txt
+```
+
+### GPU Compatibility
+
+- **RTX 40-series and older**: Full CUDA 12.1 support ✅
+- **RTX 30-series**: Excellent performance ✅
+- **RTX 20-series**: Good performance ✅
+- **RTX 50-series** (5070 Ti, etc.): Limited support - will fall back to CPU ⚠️
+
+**Note**: RTX 50-series GPUs may show compatibility warnings. This is expected behavior - the system will automatically use CPU processing, which is still functional but slower. We prioritize stability over experimental PyTorch versions.
+
+### Development Commands
+
+```bash
+# Run the application
+python main.py
+
+# Run CLI version
+python -m sovereign.cli
+
+# Run tests
+python -m pytest tests/
+
+# Run with coverage
+python -m pytest tests/ --cov=src/sovereign
+```
+
+For detailed development guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## 🛠️ Configuration
 
 ### Environment Variables

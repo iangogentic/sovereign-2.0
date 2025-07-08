@@ -1,0 +1,83 @@
+# Task ID: 28
+# Title: Formalize Development Environment Setup
+# Status: pending
+# Dependencies: 15, 17, 1
+# Priority: high
+# Description: Create comprehensive development environment documentation and automation to ensure consistent, stable setups across all development machines with focus on PyTorch CUDA 12.1 compatibility.
+# Details:
+1. Create CONTRIBUTING.md with detailed environment setup instructions:
+   - Document Python version requirements (3.10+)
+   - Specify exact CUDA toolkit version (12.1) and compatible driver requirements
+   - Document step-by-step virtual environment creation process
+   - List all dependencies with specific version pinning for stability
+   - Include troubleshooting section for common setup issues
+
+2. Develop Windows batch script (setup_dev_env.bat) for automated environment setup:
+   - Check for Python installation and version
+   - Create and activate virtual environment
+   - Install PyTorch with CUDA 12.1 support using the correct installation command:
+     ```
+     pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
+     ```
+   - Install all other dependencies from requirements.txt
+   - Verify CUDA availability with a simple PyTorch test script
+   - Generate a report of the installed environment
+
+3. Create equivalent shell script (setup_dev_env.sh) for Linux/macOS:
+   - Implement the same functionality as the Windows batch script
+   - Add appropriate error handling and progress indicators
+   - Include GPU detection and compatibility checks
+
+4. Update README.md with development setup guidance:
+   - Add a "Development Setup" section with quick start instructions
+   - Link to CONTRIBUTING.md for detailed instructions
+   - Document manual and automated setup options
+   - Include verification steps to confirm proper environment setup
+
+5. Create environment validation script (validate_env.py):
+   - Check Python version
+   - Verify PyTorch installation with correct CUDA support
+   - Test GPU detection and basic operations
+   - Validate all required dependencies are installed
+   - Generate a report of any issues found
+
+6. Document specific version requirements in a requirements-dev.txt file:
+   - Pin PyTorch to version compatible with CUDA 12.1
+   - Specify exact versions for all dependencies to ensure consistency
+   - Include development-only dependencies (testing frameworks, linters, etc.)
+
+7. Add CI configuration to validate environment setup:
+   - Create GitHub Actions workflow to test environment setup scripts
+   - Verify scripts work on Windows, Linux, and macOS
+   - Test with different GPU configurations when possible
+
+# Test Strategy:
+1. Test automated setup scripts on multiple clean environments:
+   - Test on Windows 10/11 with different NVIDIA GPU configurations
+   - Test on Ubuntu Linux with compatible NVIDIA GPUs
+   - Test on macOS (for CPU-only operation)
+   - Verify scripts handle pre-existing installations gracefully
+
+2. Validate PyTorch CUDA compatibility:
+   - Run the validation script to confirm PyTorch can access CUDA
+   - Execute a simple tensor operation on GPU and measure performance
+   - Verify correct CUDA version (12.1) is detected by PyTorch
+   - Test with both consumer (RTX) and professional NVIDIA GPUs
+
+3. Perform user testing of documentation:
+   - Have team members follow the documentation on clean machines
+   - Collect feedback on clarity and completeness
+   - Identify and document any edge cases or system-specific issues
+   - Update documentation based on feedback
+
+4. Verify consistency across development environments:
+   - Compare package versions across different setups
+   - Run the application's test suite on different environments
+   - Ensure model loading and inference work identically
+   - Measure and compare performance metrics
+
+5. Test error handling and troubleshooting guidance:
+   - Simulate common error conditions (missing CUDA, incompatible drivers)
+   - Verify error messages are clear and actionable
+   - Test the troubleshooting steps in the documentation
+   - Ensure validation script correctly identifies and reports issues

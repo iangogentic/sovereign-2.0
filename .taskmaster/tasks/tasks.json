@@ -1112,11 +1112,26 @@
         ],
         "priority": "high",
         "subtasks": []
+      },
+      {
+        "id": 28,
+        "title": "Formalize Development Environment Setup",
+        "description": "Create comprehensive development environment documentation and automation to ensure consistent, stable setups across all development machines with focus on PyTorch CUDA 12.1 compatibility.",
+        "details": "1. Create CONTRIBUTING.md with detailed environment setup instructions:\n   - Document Python version requirements (3.10+)\n   - Specify exact CUDA toolkit version (12.1) and compatible driver requirements\n   - Document step-by-step virtual environment creation process\n   - List all dependencies with specific version pinning for stability\n   - Include troubleshooting section for common setup issues\n\n2. Develop Windows batch script (setup_dev_env.bat) for automated environment setup:\n   - Check for Python installation and version\n   - Create and activate virtual environment\n   - Install PyTorch with CUDA 12.1 support using the correct installation command:\n     ```\n     pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121\n     ```\n   - Install all other dependencies from requirements.txt\n   - Verify CUDA availability with a simple PyTorch test script\n   - Generate a report of the installed environment\n\n3. Create equivalent shell script (setup_dev_env.sh) for Linux/macOS:\n   - Implement the same functionality as the Windows batch script\n   - Add appropriate error handling and progress indicators\n   - Include GPU detection and compatibility checks\n\n4. Update README.md with development setup guidance:\n   - Add a \"Development Setup\" section with quick start instructions\n   - Link to CONTRIBUTING.md for detailed instructions\n   - Document manual and automated setup options\n   - Include verification steps to confirm proper environment setup\n\n5. Create environment validation script (validate_env.py):\n   - Check Python version\n   - Verify PyTorch installation with correct CUDA support\n   - Test GPU detection and basic operations\n   - Validate all required dependencies are installed\n   - Generate a report of any issues found\n\n6. Document specific version requirements in a requirements-dev.txt file:\n   - Pin PyTorch to version compatible with CUDA 12.1\n   - Specify exact versions for all dependencies to ensure consistency\n   - Include development-only dependencies (testing frameworks, linters, etc.)\n\n7. Add CI configuration to validate environment setup:\n   - Create GitHub Actions workflow to test environment setup scripts\n   - Verify scripts work on Windows, Linux, and macOS\n   - Test with different GPU configurations when possible",
+        "testStrategy": "1. Test automated setup scripts on multiple clean environments:\n   - Test on Windows 10/11 with different NVIDIA GPU configurations\n   - Test on Ubuntu Linux with compatible NVIDIA GPUs\n   - Test on macOS (for CPU-only operation)\n   - Verify scripts handle pre-existing installations gracefully\n\n2. Validate PyTorch CUDA compatibility:\n   - Run the validation script to confirm PyTorch can access CUDA\n   - Execute a simple tensor operation on GPU and measure performance\n   - Verify correct CUDA version (12.1) is detected by PyTorch\n   - Test with both consumer (RTX) and professional NVIDIA GPUs\n\n3. Perform user testing of documentation:\n   - Have team members follow the documentation on clean machines\n   - Collect feedback on clarity and completeness\n   - Identify and document any edge cases or system-specific issues\n   - Update documentation based on feedback\n\n4. Verify consistency across development environments:\n   - Compare package versions across different setups\n   - Run the application's test suite on different environments\n   - Ensure model loading and inference work identically\n   - Measure and compare performance metrics\n\n5. Test error handling and troubleshooting guidance:\n   - Simulate common error conditions (missing CUDA, incompatible drivers)\n   - Verify error messages are clear and actionable\n   - Test the troubleshooting steps in the documentation\n   - Ensure validation script correctly identifies and reports issues",
+        "status": "in-progress",
+        "dependencies": [
+          15,
+          17,
+          1
+        ],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-05T18:41:07.860Z",
-      "updated": "2025-07-07T19:27:59.856Z",
+      "updated": "2025-07-07T20:38:49.395Z",
       "description": "Tasks for master context"
     }
   }
